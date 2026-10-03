@@ -1,5 +1,5 @@
 import { describe, expect, it } from '@jest/globals';
-import { computeRenderWindow, DEFAULT_ITEM_SIZE } from '../NaiveList';
+import { computeRenderWindow, DEFAULT_ITEM_SIZE } from '../renderWindow';
 
 describe('computeRenderWindow', () => {
   it('renders nothing for empty data', () => {
