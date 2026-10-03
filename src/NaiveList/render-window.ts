@@ -39,33 +39,29 @@ export function computeRenderWindow({
   const windowStartOffset = viewportStart - bufferSize;
   const windowEndOffset = viewportEnd + bufferSize;
 
-  let startIndex = -1;
-  let endIndex = itemCount;
-  let sizerBefore = 0;
+  let itemIndex = 0;
   let itemOffset = 0;
 
-  for (let index = 0; index < itemCount; index++) {
-    const size = sizes[index] ?? DEFAULT_ITEM_SIZE;
-    if (startIndex === -1 && itemOffset + size > windowStartOffset) {
-      startIndex = index;
-      sizerBefore = itemOffset;
-    }
-    if (startIndex !== -1 && itemOffset >= windowEndOffset) {
-      endIndex = index;
-      break;
-    }
-    itemOffset += size;
+  // Find and measure items before the viewport
+  for (; itemIndex < itemCount; itemIndex += 1) {
+    const itemEnd = itemOffset + (sizes[itemIndex] ?? DEFAULT_ITEM_SIZE);
+    if (itemEnd > windowStartOffset) break;
+    itemOffset = itemEnd;
   }
+  const startIndex = itemIndex;
+  const sizerBefore = itemOffset;
 
+  // Find items in the viewport
+  for (; itemIndex < itemCount; itemIndex += 1) {
+    if (itemOffset >= windowEndOffset) break;
+    itemOffset += sizes[itemIndex] ?? DEFAULT_ITEM_SIZE;
+  }
+  const endIndex = itemIndex;
+
+  // Measure the items after the viewport
   let sizerAfter = 0;
-  for (let index = endIndex; index < itemCount; index++) {
-    sizerAfter += sizes[index] ?? DEFAULT_ITEM_SIZE;
-  }
-
-  if (startIndex === -1) {
-    // Scrolled past all content (e.g. data shrank): render nothing.
-    startIndex = itemCount;
-    sizerBefore = itemOffset;
+  for (; itemIndex < itemCount; itemIndex += 1) {
+    sizerAfter += sizes[itemIndex] ?? DEFAULT_ITEM_SIZE;
   }
 
   return { startIndex, endIndex, sizerBefore, sizerAfter };
