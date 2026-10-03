@@ -94,6 +94,8 @@ export function NaiveList<T>({ data, renderItem }: NaiveListProps<T>) {
     viewportSize
   );
 
+  // The final offset of a drag or momentum scroll may only be reported by the
+  // matching end event, not by `onScroll`.
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     setScrollOffset(event.nativeEvent.contentOffset.y);
   };
@@ -122,6 +124,8 @@ export function NaiveList<T>({ data, renderItem }: NaiveListProps<T>) {
   return (
     <ScrollView
       onScroll={handleScroll}
+      onScrollEndDrag={handleScroll}
+      onMomentumScrollEnd={handleScroll}
       onLayout={handleLayout}
       scrollEventThrottle={16}
     >
