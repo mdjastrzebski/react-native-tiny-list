@@ -31,27 +31,36 @@ export function computeRenderWindow({
   scrollOffset,
   viewportSize,
 }: ComputeRenderWindowParams): RenderWindow {
+  // Render some items before and after the viewport to reduce flickering
   const bufferSize = viewportSize;
-  const windowStart = scrollOffset - bufferSize;
-  const windowEnd = scrollOffset + viewportSize + bufferSize;
+  const windowStartOffset = scrollOffset - bufferSize;
+  const windowEndOffset = scrollOffset + viewportSize + bufferSize;
 
   let itemsBefore = 0;
   let itemsAfter = 0;
   let sizerBefore = 0;
   let sizerAfter = 0;
 
-  let itemStart = 0;
+  let itemStartOffset = 0;
+
+  // Go though list and measure items before, inside and after viewport
   for (let itemIndex = 0; itemIndex < itemCount; itemIndex += 1) {
     const itemSize = sizes[itemIndex] ?? DEFAULT_ITEM_SIZE;
-    const itemEnd = itemStart + itemSize;
-    if (itemEnd <= windowStart) {
+    const itemEndOffset = itemStartOffset + itemSize;
+
+    // Items Before window
+    if (itemEndOffset <= windowStartOffset) {
       itemsBefore += 1;
       sizerBefore += itemSize;
-    } else if (itemStart >= windowEnd) {
+    }
+    // Items after the window
+    else if (itemStartOffset >= windowEndOffset) {
       itemsAfter += 1;
       sizerAfter += itemSize;
     }
-    itemStart = itemEnd;
+
+    // Next Item
+    itemStartOffset = itemEndOffset;
   }
 
   return {
