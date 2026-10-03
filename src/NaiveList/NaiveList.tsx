@@ -6,7 +6,7 @@ import {
   type NativeScrollEvent,
   type NativeSyntheticEvent,
 } from 'react-native';
-import { computeRenderWindow } from './renderWindow';
+import { computeRenderWindow } from './render-window';
 
 export interface NaiveListRenderItemInfo<T> {
   item: T;
@@ -31,12 +31,12 @@ export function NaiveList<T>({ data, renderItem }: NaiveListProps<T>) {
   const [scrollOffset, setScrollOffset] = useState(0);
   const [viewportSize, setViewportSize] = useState(0);
 
-  const { start, end, leadingSize, trailingSize } = computeRenderWindow(
-    data.length,
-    sizesRef.current,
+  const { start, end, leadingSize, trailingSize } = computeRenderWindow({
+    itemCount: data.length,
+    sizes: sizesRef.current,
     scrollOffset,
-    viewportSize
-  );
+    viewportSize,
+  });
 
   // The final offset of a drag or momentum scroll may only be reported by the
   // matching end event, not by `onScroll`.
