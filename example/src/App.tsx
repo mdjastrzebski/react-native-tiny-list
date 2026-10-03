@@ -1,12 +1,25 @@
-import { Text, View, StyleSheet } from 'react-native';
-import { multiply } from 'react-native-simple-list';
+import { StyleSheet, Text, View } from 'react-native';
+import { NaiveList } from 'react-native-simple-list';
 
-const result = multiply(3, 7);
+type Item = { id: number; title: string };
+
+const DATA: Item[] = Array.from({ length: 10_000 }, (_, i) => ({
+  id: i,
+  title: `Item ${i}`,
+}));
 
 export default function App() {
   return (
     <View style={styles.container}>
-      <Text>Result: {result}</Text>
+      <NaiveList
+        data={DATA}
+        renderItem={({ item, index }) => (
+          // Vary heights to exercise measurement.
+          <View style={[styles.item, { height: 40 + (index % 5) * 15 }]}>
+            <Text>{item.title}</Text>
+          </View>
+        )}
+      />
     </View>
   );
 }
@@ -14,7 +27,11 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
+  },
+  item: {
     justifyContent: 'center',
+    paddingHorizontal: 16,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: '#ccc',
   },
 });
