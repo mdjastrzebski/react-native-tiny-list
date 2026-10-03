@@ -1,0 +1,12 @@
+[submodule "refs/flash-list"]
+	path = refs/flash-list
+	url = https://github.com/mdjastrzebski/flash-list.git
+	branch = mdj/index
+[submodule "refs/legend-list"]
+	path = refs/legend-list
+	url = https://github.com/mdjastrzebski/legend-list.git
+	branch = mdj/index
+[submodule "refs/react-native"]
+	path = refs/react-native
+	url = https://github.com/mdjastrzebski/react-native.git
+	branch = mdj/index

@@ -16,4 +16,14 @@ const config = withMetroConfig(getDefaultConfig(__dirname), {
   conditions: ['react-native-simple-list-source'],
 });
 
+// Keep reference repos (git submodules in `refs/`) out of Metro's file map
+config.resolver.blockList = [
+  ...[config.resolver.blockList ?? []].flat(),
+  new RegExp(`^${escapeRegExp(path.join(root, 'refs'))}\\/.*$`),
+];
+
+function escapeRegExp(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 module.exports = config;
