@@ -22,7 +22,8 @@ export interface ComputeRenderWindowParams {
 
 /**
  * Picks the items that overlap the viewport plus one viewport of buffer on
- * each side. Unmeasured items count as `DEFAULT_ITEM_SIZE`.
+ * each side. Items outside that window are replaced by sizers. Unmeasured items
+ * count as `DEFAULT_ITEM_SIZE`.
  */
 export function computeRenderWindow({
   itemCount,
@@ -30,39 +31,33 @@ export function computeRenderWindow({
   scrollOffset,
   viewportSize,
 }: ComputeRenderWindowParams): RenderWindow {
-  // This is the viewport, visible part of the list
-  const viewportStart = scrollOffset;
-  const viewportEnd = scrollOffset + viewportSize;
-
-  // Let's add some extra buffer before and after to reduce flickering during scroll
   const bufferSize = viewportSize;
-  const windowStartOffset = viewportStart - bufferSize;
-  const windowEndOffset = viewportEnd + bufferSize;
+  const windowStart = scrollOffset - bufferSize;
+  const windowEnd = scrollOffset + viewportSize + bufferSize;
 
-  let itemIndex = 0;
-  let itemOffset = 0;
-
-  // Find and measure items before the viewport
-  for (; itemIndex < itemCount; itemIndex += 1) {
-    const itemEnd = itemOffset + (sizes[itemIndex] ?? DEFAULT_ITEM_SIZE);
-    if (itemEnd > windowStartOffset) break;
-    itemOffset = itemEnd;
-  }
-  const startIndex = itemIndex;
-  const sizerBefore = itemOffset;
-
-  // Find items in the viewport
-  for (; itemIndex < itemCount; itemIndex += 1) {
-    if (itemOffset >= windowEndOffset) break;
-    itemOffset += sizes[itemIndex] ?? DEFAULT_ITEM_SIZE;
-  }
-  const endIndex = itemIndex;
-
-  // Measure the items after the viewport
+  let itemsBefore = 0;
+  let itemsAfter = 0;
+  let sizerBefore = 0;
   let sizerAfter = 0;
-  for (; itemIndex < itemCount; itemIndex += 1) {
-    sizerAfter += sizes[itemIndex] ?? DEFAULT_ITEM_SIZE;
+
+  let itemStart = 0;
+  for (let itemIndex = 0; itemIndex < itemCount; itemIndex += 1) {
+    const itemSize = sizes[itemIndex] ?? DEFAULT_ITEM_SIZE;
+    const itemEnd = itemStart + itemSize;
+    if (itemEnd <= windowStart) {
+      itemsBefore += 1;
+      sizerBefore += itemSize;
+    } else if (itemStart >= windowEnd) {
+      itemsAfter += 1;
+      sizerAfter += itemSize;
+    }
+    itemStart = itemEnd;
   }
 
-  return { startIndex, endIndex, sizerBefore, sizerAfter };
+  return {
+    startIndex: itemsBefore,
+    endIndex: itemCount - itemsAfter,
+    sizerBefore,
+    sizerAfter,
+  };
 }
