@@ -26,28 +26,28 @@ export interface NaiveListProps<T> {
  * areas and jumps while scrolling fast or when estimates are off.
  */
 export function NaiveList<T>({ data, renderItem }: NaiveListProps<T>) {
-  const sizesRef = useRef<Array<number | undefined>>([]);
-  const [, forceRender] = useReducer((count: number) => count + 1, 0);
   const [scrollOffset, setScrollOffset] = useState(0);
   const [viewportSize, setViewportSize] = useState(0);
 
-  const { start, end, leadingSize, trailingSize } = computeRenderWindow({
-    itemCount: data.length,
-    sizes: sizesRef.current,
-    scrollOffset,
-    viewportSize,
-  });
+  const sizesRef = useRef<Array<number | undefined>>([]);
+  const [, forceRender] = useReducer((count: number) => count + 1, 0);
 
-  // The final offset of a drag or momentum scroll may only be reported by the
-  // matching end event, not by `onScroll`.
-  const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-    setScrollOffset(event.nativeEvent.contentOffset.y);
-  };
+  // Which items to actuall render, what spacer to put before and after them
+  const { startIndex, endIndex, sizerBefore, sizerAfter } = computeRenderWindow(
+    {
+      itemCount: data.length,
+      sizes: sizesRef.current,
+      scrollOffset,
+      viewportSize,
+    }
+  );
 
+  // Needed to establish viewport height
   const handleLayout = (event: LayoutChangeEvent) => {
     setViewportSize(event.nativeEvent.layout.height);
   };
 
+  // Needed to get actual item size
   const handleItemLayout = (index: number, event: LayoutChangeEvent) => {
     const size = event.nativeEvent.layout.height;
     if (sizesRef.current[index] !== size) {
@@ -56,9 +56,17 @@ export function NaiveList<T>({ data, renderItem }: NaiveListProps<T>) {
     }
   };
 
+    // Needed to get the current scroll positon
+  const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    setScrollOffset(event.nativeEvent.contentOffset.y);
+  };
+
+
+  // Items we will actually render
   const items: ReactNode[] = [];
-  for (let index = start; index < end; index++) {
+  for (let index = startIndex; index < endIndex; index++) {
     items.push(
+      // Wrapper view to handle sizing
       <View key={index} onLayout={(event) => handleItemLayout(index, event)}>
         {renderItem({ item: data[index] as T, index })}
       </View>
@@ -73,9 +81,9 @@ export function NaiveList<T>({ data, renderItem }: NaiveListProps<T>) {
       onLayout={handleLayout}
       scrollEventThrottle={16}
     >
-      <View style={{ height: leadingSize }} />
+      <View style={{ height: sizerBefore }} />
       {items}
-      <View style={{ height: trailingSize }} />
+      <View style={{ height: sizerAfter }} />
     </ScrollView>
   );
 }
