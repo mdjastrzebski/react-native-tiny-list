@@ -28,6 +28,36 @@ area and replaces the rest with spacer views. Item heights are measured with
 `onLayout` and cached by index; unmeasured items are assumed to be 50 px tall.
 Expect blank areas and content jumps while scrolling fast.
 
+```tsx
+import { MiniFlatList } from 'react-native-tiny-list';
+
+<MiniFlatList
+  data={items}
+  renderItem={renderRow} // keep it stable, not an inline function
+  keyExtractor={(item) => item.id}
+  initialNumToRender={10}
+  windowSize={21}
+  maxToRenderPerBatch={10}
+  updateCellsBatchingPeriod={50}
+/>
+```
+
+`MiniFlatList` adds the core ideas of React Native's `FlatList` on top of
+`TinyList`:
+
+- **Keys.** `keyExtractor` (default: `item.key`, then `item.id`, then the
+  index) keys both the items and the cached sizes, so sizes survive inserts and
+  reorders. Unmeasured items count as the average measured size.
+- **`initialNumToRender`.** Items rendered before the viewport is measured.
+- **`windowSize`.** The area kept rendered, in viewports, centered on the
+  visible one.
+- **Batched rendering.** Scrolling does not re-render the list while the
+  visible items are already rendered. The area off screen is filled
+  `maxToRenderPerBatch` items at a time, every `updateCellsBatchingPeriod` ms.
+  When the visible area is blank, the list renders right away.
+- **Memoized items.** Each item re-renders only when its props or `extraData`
+  change.
+
 
 ## Contributing
 
