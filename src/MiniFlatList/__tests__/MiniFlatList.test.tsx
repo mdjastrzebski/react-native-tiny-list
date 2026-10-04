@@ -97,7 +97,27 @@ describe('MiniFlatList', () => {
     // No timer advanced: the visible area was blank, so it renders now.
     await fireEvent(scrollView, 'scroll', scrollEvent(3000));
     expect(screen.getByText('Item 60')).toBeOnTheScreen();
-    expect(screen.queryByText('Item 0')).not.toBeOnTheScreen();
+    expect(screen.queryByText('Item 20')).not.toBeOnTheScreen();
+  });
+
+  it('keeps the first initialNumToRender items rendered', async () => {
+    const scrollView = await renderList({ initialNumToRender: 3 });
+    await fireEvent(scrollView, 'layout', layoutEvent(500));
+    await runNextBatch();
+
+    // Window is [2500, 4000) px: items 50..79, plus items 0..2.
+    await fireEvent(scrollView, 'scroll', scrollEvent(3000));
+    await runNextBatch();
+    await runNextBatch();
+    const items = renderedItems();
+    expect(items.slice(0, 4)).toEqual([
+      'Item 0',
+      'Item 1',
+      'Item 2',
+      'Item 50',
+    ]);
+    expect(items.at(-1)).toBe('Item 79');
+    expect(items).toHaveLength(33);
   });
 
   it('waits for the next batch when the visible items are rendered', async () => {
@@ -116,7 +136,10 @@ describe('MiniFlatList', () => {
   });
 
   it('keeps measured sizes with their item when data is reordered', async () => {
-    const scrollView = await renderList({ maxToRenderPerBatch: 100 });
+    const scrollView = await renderList({
+      initialNumToRender: 1,
+      maxToRenderPerBatch: 100,
+    });
     await fireEvent(scrollView, 'layout', layoutEvent(500));
     await runNextBatch();
 
@@ -140,6 +163,7 @@ describe('MiniFlatList', () => {
         data={reordered}
         renderItem={renderItem}
         windowSize={3}
+        initialNumToRender={1}
         maxToRenderPerBatch={100}
       />
     );

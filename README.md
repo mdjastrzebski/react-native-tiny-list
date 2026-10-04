@@ -49,6 +49,7 @@ import { MiniFlatList } from 'react-native-tiny-list';
   index) keys both the items and the cached sizes, so sizes survive inserts and
   reorders. Unmeasured items count as the average measured size.
 - **`initialNumToRender`.** Items rendered before the viewport is measured.
+  They stay rendered, so scrolling back to the top shows them instantly.
 - **`windowSize`.** The area kept rendered, in viewports, centered on the
   visible one.
 - **Batched rendering.** Scrolling does not re-render the list while the

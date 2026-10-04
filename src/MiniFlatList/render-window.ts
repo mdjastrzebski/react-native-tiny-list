@@ -102,6 +102,35 @@ export function growTowardTarget(
   return { start, end };
 }
 
+export interface RenderedItems {
+  /** The first `initialNumToRender` items. Always rendered. */
+  initial: ItemRange;
+  /** The render window, minus any items already in `initial`. */
+  window: ItemRange;
+}
+
+/**
+ * Like FlatList, keeps the first `initialNumToRender` items rendered so that
+ * scrolling back to the top shows them instantly. A spacer goes between them
+ * and the window when the two do not touch.
+ */
+export function addInitialItems(
+  window: ItemRange,
+  initialNumToRender: number,
+  itemCount: number
+): RenderedItems {
+  const initialEnd = Math.min(initialNumToRender, itemCount);
+
+  // `data` may have shrunk since the window was computed, so clamp it too.
+  const start = Math.min(Math.max(window.start, initialEnd), itemCount);
+  const end = Math.min(Math.max(window.end, start), itemCount);
+
+  return {
+    initial: { start: 0, end: initialEnd },
+    window: { start, end },
+  };
+}
+
 /** Number of items in `range` that are not in `previous`. */
 function countNewItems(range: ItemRange, previous: ItemRange): number {
   const overlap = Math.max(

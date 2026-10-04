@@ -20,6 +20,7 @@ import {
   type ItemRange,
 } from './item-offsets';
 import {
+  addInitialItems,
   computeRenderWindow,
   isRangeInside,
   isSameRange,
@@ -38,7 +39,7 @@ export interface MiniFlatListProps<T> {
   keyExtractor?: (item: T, index: number) => string;
   /** Change it to re-render all items, e.g. when `renderItem` reads outside state. */
   extraData?: unknown;
-  /** Items rendered before the viewport is measured. */
+  /** Items rendered before the viewport is measured, and kept rendered after. */
   initialNumToRender?: number;
   /** Area to keep rendered, in viewports, centered on the visible one. */
   windowSize?: number;
@@ -55,6 +56,7 @@ export interface MiniFlatListProps<T> {
  * - caches item sizes by key, so they survive inserts and reorders;
  * - skips re-rendering on scroll unless the visible area is not rendered yet;
  * - fills the area off screen in small batches instead of all at once;
+ * - keeps the first `initialNumToRender` items rendered, for a fast scroll to top;
  * - memoizes items, so a batch renders only the new ones.
  */
 export function MiniFlatList<T>({
@@ -161,25 +163,30 @@ export function MiniFlatList<T>({
     }
   };
 
-  // `data` may have shrunk since the window was computed.
-  const start = Math.min(renderWindow.start, data.length);
-  const end = Math.min(renderWindow.end, data.length);
+  const rendered = addInitialItems(
+    renderWindow,
+    initialNumToRender,
+    data.length
+  );
 
-  const cells: ReactNode[] = [];
-  for (let index = start; index < end; index++) {
-    const key = keys[index]!;
-    cells.push(
-      <Cell
-        key={key}
-        cellKey={key}
-        item={data[index] as T}
-        index={index}
-        renderItem={renderItem}
-        extraData={extraData}
-        onCellLayout={handleCellLayout}
-      />
-    );
-  }
+  const renderCells = ({ start, end }: ItemRange) => {
+    const cells: ReactNode[] = [];
+    for (let index = start; index < end; index++) {
+      const key = keys[index]!;
+      cells.push(
+        <Cell
+          key={key}
+          cellKey={key}
+          item={data[index] as T}
+          index={index}
+          renderItem={renderItem}
+          extraData={extraData}
+          onCellLayout={handleCellLayout}
+        />
+      );
+    }
+    return cells;
+  };
 
   return (
     <ScrollView
@@ -189,9 +196,21 @@ export function MiniFlatList<T>({
       onLayout={handleLayout}
       scrollEventThrottle={16}
     >
-      <View style={{ height: offsets[start] }} />
-      {cells}
-      <View style={{ height: offsets[data.length]! - offsets[end]! }} />
+      {renderCells(rendered.initial)}
+      {/* Stands in for the items between the initial items and the window. */}
+      <View
+        style={{
+          height:
+            offsets[rendered.window.start]! - offsets[rendered.initial.end]!,
+        }}
+      />
+      {renderCells(rendered.window)}
+      {/* Stands in for the items after the window. */}
+      <View
+        style={{
+          height: offsets[data.length]! - offsets[rendered.window.end]!,
+        }}
+      />
     </ScrollView>
   );
 }

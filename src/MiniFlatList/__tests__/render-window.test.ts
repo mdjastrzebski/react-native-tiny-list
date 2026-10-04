@@ -1,5 +1,9 @@
 import { describe, expect, it } from '@jest/globals';
-import { computeRenderWindow, growTowardTarget } from '../render-window';
+import {
+  addInitialItems,
+  computeRenderWindow,
+  growTowardTarget,
+} from '../render-window';
 
 // 100 items of 100 px each.
 const OFFSETS = Array.from({ length: 101 }, (_, i) => i * 100);
@@ -87,5 +91,32 @@ describe('growTowardTarget', () => {
     expect(
       growTowardTarget({ start: 8, end: 12 }, target, { start: 0, end: 0 }, 5)
     ).toEqual({ start: 7, end: 12 });
+  });
+});
+
+describe('addInitialItems', () => {
+  it('adds the initial items before a window further down', () => {
+    expect(addInitialItems({ start: 50, end: 80 }, 10, 100)).toEqual({
+      initial: { start: 0, end: 10 },
+      window: { start: 50, end: 80 },
+    });
+  });
+
+  it('removes initial items from a window that overlaps them', () => {
+    expect(addInitialItems({ start: 0, end: 30 }, 10, 100)).toEqual({
+      initial: { start: 0, end: 10 },
+      window: { start: 10, end: 30 },
+    });
+    expect(addInitialItems({ start: 0, end: 5 }, 10, 100)).toEqual({
+      initial: { start: 0, end: 10 },
+      window: { start: 10, end: 10 },
+    });
+  });
+
+  it('clamps both to the item count', () => {
+    expect(addInitialItems({ start: 50, end: 80 }, 10, 5)).toEqual({
+      initial: { start: 0, end: 5 },
+      window: { start: 5, end: 5 },
+    });
   });
 });
