@@ -4,6 +4,10 @@ Contributions are always welcome, no matter how large or small!
 
 We want this community to be friendly and respectful to each other. Please follow it in all your interactions with the project. Before contributing, please read the [code of conduct](./CODE_OF_CONDUCT.md).
 
+## Project goals
+
+This project is meant for educational use. It shows the core ideas behind virtualized lists in code that is easy to read and reason about. When choosing between a simpler implementation and a faster one, prefer the simpler one, and document known limitations (flicker, blank areas, layout jumps) rather than adding complexity to hide them. Performance-focused techniques belong in separate, clearly named components, not in the basic ones.
+
 ## Development workflow
 
 This project is a monorepo managed using [Yarn workspaces](https://yarnpkg.com/features/workspaces). It contains the following packages:

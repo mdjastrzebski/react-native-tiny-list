@@ -1,5 +1,17 @@
 # Repository Guidelines
 
+## Purpose: an educational codebase
+
+This repo exists to teach how virtualized lists work. Code here should make the core ideas easy to read and reason about: measuring item sizes, computing the render window from the scroll offset, and standing in for unrendered items with spacers. Readability comes before performance.
+
+When making changes:
+
+- **Prefer the obvious implementation.** A linear scan beats a binary search, a plain re-render beats a memoization layer, unless the simple version is unusably slow for the example app.
+- **Accept known flaws** such as flicker, blank areas while scrolling fast, and layout jumps when estimates are off. Document them instead of hiding them behind complex fixes.
+- **Keep core logic in small, pure functions** (for example `computeRenderWindow` in `src/NaiveList/render-window.ts`) that can be read and unit-tested apart from React.
+- **Comment the why**, especially where React Native behavior is surprising (for example, the final drag offset arriving only in `onScrollEndDrag`).
+- **Don't port optimizations from `refs/`** (cell recycling, offset projection, batching, scroll anchoring) unless the task is explicitly to demonstrate that technique, and then do it in a separate, clearly named component instead of complicating an existing one.
+
 ## Reference repos (`refs/`)
 
 `refs/` holds git submodules of other list implementations, checked out at their `mdj/index` branches. They are read-only reference material: do not edit them, and do not import from them. Lint, typecheck, Prettier, Jest, Watchman and Metro all ignore `refs/`.
