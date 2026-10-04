@@ -59,6 +59,23 @@ import { TinyFlatList } from 'react-native-tiny-list';
 - **Memoized items.** Each item re-renders only when its props or `extraData`
   change.
 
+```tsx
+import { MiniFlashList } from 'react-native-tiny-list';
+
+<MiniFlashList
+  data={items}
+  renderItem={renderRow}
+  getItemType={(item) => (item.isHeader ? 'header' : 'row')}
+/>
+```
+
+`MiniFlashList` is a minimal version of FlashList v2 that shows its core
+mechanisms: a layout manager that positions every cell absolutely, cell
+recycling through a render stack of reusable React keys, and synchronous
+measurement before paint (new architecture only). See
+[`src/MiniFlashList/README.md`](src/MiniFlashList/README.md) for a guided tour
+and what was left out.
+
 
 ## Contributing
 
