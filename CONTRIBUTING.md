@@ -6,7 +6,7 @@ We want this community to be friendly and respectful to each other. Please follo
 
 ## Project goals
 
-This project is meant for educational use. It shows the core ideas behind virtualized lists in code that is easy to read and reason about. Good algorithms (such as binary search), sensible memoization and sound structure are welcome, as long as each technique sits behind a clearly named function so the code stays easy to follow. Avoid optimizations that make the code hard to read for little gain, and document known limitations rather than adding complexity to hide them. Large techniques such as cell recycling belong in separate, clearly named components.
+This project is meant for educational use. It shows the core ideas behind virtualized lists in code that is easy to read and reason about. Good algorithms (such as binary search), sensible memoization and sound structure are welcome, as long as each technique sits behind a clearly named function so the code stays easy to follow. Use comments freely to explain what each step does, why and how, but keep each one short. Avoid optimizations that make the code hard to read for little gain, and document known limitations rather than adding complexity to hide them. Large techniques such as cell recycling belong in separate, clearly named components.
 
 ## Development workflow
 
