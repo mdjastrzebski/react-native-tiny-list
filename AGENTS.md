@@ -2,15 +2,15 @@
 
 ## Purpose: an educational codebase
 
-This repo exists to teach how virtualized lists work. Code here should make the core ideas easy to read and reason about: measuring item sizes, computing the render window from the scroll offset, and standing in for unrendered items with spacers. Readability comes before performance.
+This repo exists to teach how virtualized lists work. Code here should make the core ideas easy to read and reason about: measuring item sizes, computing the render window from the scroll offset, and standing in for unrendered items with spacers. Good performance is still welcome, but never at the cost of code a reader can't follow.
 
 When making changes:
 
-- **Prefer the obvious implementation.** A linear scan beats a binary search, a plain re-render beats a memoization layer, unless the simple version is unusably slow for the example app.
-- **Accept known flaws** such as flicker, blank areas while scrolling fast, and layout jumps when estimates are off. Document them instead of hiding them behind complex fixes.
+- **Use good algorithms and structure, behind clear names.** Prefer binary search over a linear scan, cached offsets over recomputing them, and reasonable memoization over needless re-renders. Extract each technique into a small, well-named function (for example `findFirstItemAfterOffset`) so the calling code still reads as a description of the idea.
 - **Keep core logic in small, pure functions** (for example `computeRenderWindow` in `src/NaiveList/render-window.ts`) that can be read and unit-tested apart from React.
 - **Comment the why**, especially where React Native behavior is surprising (for example, the final drag offset arriving only in `onScrollEndDrag`).
-- **Don't port optimizations from `refs/`** (cell recycling, offset projection, batching, scroll anchoring) unless the task is explicitly to demonstrate that technique, and then do it in a separate, clearly named component instead of complicating an existing one.
+- **Don't trade clarity for small wins.** Skip micro-optimizations and clever tricks that make the code harder to follow for little gain. Known flaws such as flicker or blank areas while scrolling fast are acceptable when fixing them would obscure the core idea; document them instead.
+- **Put large techniques in their own component.** Machinery such as cell recycling, velocity-based offset projection or scroll anchoring (see `refs/`) belongs in a separate, clearly named component, not bolted onto an existing simpler one.
 
 ## Reference repos (`refs/`)
 
