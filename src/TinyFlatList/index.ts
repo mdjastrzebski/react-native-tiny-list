@@ -1,10 +1,6 @@
 export {
-  TinyList,
-  type TinyListProps,
-  type TinyListRenderItemInfo,
-} from './TinyList';
-export {
   TinyFlatList,
+  defaultKeyExtractor,
   type TinyFlatListProps,
   type TinyFlatListRenderItemInfo,
 } from './TinyFlatList';

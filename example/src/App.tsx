@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { Button, StyleSheet, Text, View } from 'react-native';
 import {
-  MiniFlatList,
+  TinyFlatList,
   TinyList,
-  type MiniFlatListRenderItemInfo,
+  type TinyFlatListRenderItemInfo,
 } from 'react-native-tiny-list';
 
 type Item = { id: number; title: string };
@@ -13,9 +13,9 @@ const DATA: Item[] = Array.from({ length: 10_000 }, (_, i) => ({
   title: `Item ${i}`,
 }));
 
-// Defined outside the component so it stays stable and MiniFlatList can skip
+// Defined outside the component so it stays stable and TinyFlatList can skip
 // re-rendering unchanged items.
-function renderItem({ item, index }: MiniFlatListRenderItemInfo<Item>) {
+function renderItem({ item, index }: TinyFlatListRenderItemInfo<Item>) {
   return (
     // Vary heights to exercise measurement.
     <View style={[styles.item, { height: 40 + (index % 5) * 15 }]}>
@@ -25,18 +25,18 @@ function renderItem({ item, index }: MiniFlatListRenderItemInfo<Item>) {
 }
 
 export default function App() {
-  const [list, setList] = useState<'tiny' | 'mini'>('mini');
+  const [list, setList] = useState<'list' | 'flatList'>('flatList');
 
   return (
     <View style={styles.container}>
       <View style={styles.toolbar}>
-        <Button title="TinyList" onPress={() => setList('tiny')} />
-        <Button title="MiniFlatList" onPress={() => setList('mini')} />
+        <Button title="TinyList" onPress={() => setList('list')} />
+        <Button title="TinyFlatList" onPress={() => setList('flatList')} />
       </View>
-      {list === 'tiny' ? (
+      {list === 'list' ? (
         <TinyList data={DATA} renderItem={renderItem} />
       ) : (
-        <MiniFlatList data={DATA} renderItem={renderItem} />
+        <TinyFlatList data={DATA} renderItem={renderItem} />
       )}
     </View>
   );

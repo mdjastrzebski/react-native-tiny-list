@@ -8,8 +8,8 @@ import {
 } from '@jest/globals';
 import { act, fireEvent, render, screen } from '@testing-library/react-native';
 import { Text } from 'react-native';
-import { MiniFlatList, type MiniFlatListProps } from '../MiniFlatList';
-import { defaultKeyExtractor } from '../MiniFlatList';
+import { TinyFlatList, type TinyFlatListProps } from '../TinyFlatList';
+import { defaultKeyExtractor } from '../TinyFlatList';
 
 type Item = { id: string; title: string };
 
@@ -28,9 +28,9 @@ function scrollEvent(y: number) {
   return { nativeEvent: { contentOffset: { x: 0, y } } };
 }
 
-async function renderList(props: Partial<MiniFlatListProps<Item>> = {}) {
+async function renderList(props: Partial<TinyFlatListProps<Item>> = {}) {
   const result = await render(
-    <MiniFlatList
+    <TinyFlatList
       data={DATA}
       renderItem={renderItem}
       windowSize={3}
@@ -53,7 +53,7 @@ function renderedItems(): string[] {
   });
 }
 
-describe('MiniFlatList', () => {
+describe('TinyFlatList', () => {
   beforeEach(() => {
     jest.useFakeTimers();
   });
@@ -159,7 +159,7 @@ describe('MiniFlatList', () => {
     // Move item 0 to the end. Its size moves with it, so items 1..20 fit.
     const reordered = [...DATA.slice(1), DATA[0]!];
     await screen.rerender(
-      <MiniFlatList
+      <TinyFlatList
         data={reordered}
         renderItem={renderItem}
         windowSize={3}
@@ -191,14 +191,14 @@ describe('MiniFlatList', () => {
       initialNumToRender: 2,
     };
 
-    await render(<MiniFlatList {...props} extraData={1} />);
+    await render(<TinyFlatList {...props} extraData={1} />);
     expect(calls).toEqual([0, 1]);
 
     calls.length = 0;
-    await screen.rerender(<MiniFlatList {...props} extraData={1} />);
+    await screen.rerender(<TinyFlatList {...props} extraData={1} />);
     expect(calls).toEqual([]);
 
-    await screen.rerender(<MiniFlatList {...props} extraData={2} />);
+    await screen.rerender(<TinyFlatList {...props} extraData={2} />);
     expect(calls).toEqual([0, 1]);
   });
 

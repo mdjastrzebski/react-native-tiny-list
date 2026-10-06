@@ -1,6 +1,6 @@
 # react-native-tiny-list
 
-Simple flat list component
+Tiny, readable virtualized lists for React Native
 
 ## Installation
 
@@ -29,9 +29,9 @@ area and replaces the rest with spacer views. Item heights are measured with
 Expect blank areas and content jumps while scrolling fast.
 
 ```tsx
-import { MiniFlatList } from 'react-native-tiny-list';
+import { TinyFlatList } from 'react-native-tiny-list';
 
-<MiniFlatList
+<TinyFlatList
   data={items}
   renderItem={renderRow} // keep it stable, not an inline function
   keyExtractor={(item) => item.id}
@@ -42,7 +42,7 @@ import { MiniFlatList } from 'react-native-tiny-list';
 />
 ```
 
-`MiniFlatList` adds the core ideas of React Native's `FlatList` on top of
+`TinyFlatList` adds the core ideas of React Native's `FlatList` on top of
 `TinyList`:
 
 - **Keys.** `keyExtractor` (default: `item.key`, then `item.id`, then the

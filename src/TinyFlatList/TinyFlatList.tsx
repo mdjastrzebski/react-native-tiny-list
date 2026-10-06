@@ -26,15 +26,15 @@ import {
   isSameRange,
 } from './render-window';
 
-export interface MiniFlatListRenderItemInfo<T> {
+export interface TinyFlatListRenderItemInfo<T> {
   item: T;
   index: number;
 }
 
-export interface MiniFlatListProps<T> {
+export interface TinyFlatListProps<T> {
   data: ReadonlyArray<T>;
   /** Keep it stable (not an inline function) so unchanged items skip re-rendering. */
-  renderItem: (info: MiniFlatListRenderItemInfo<T>) => ReactNode;
+  renderItem: (info: TinyFlatListRenderItemInfo<T>) => ReactNode;
   /** Unique key per item. Defaults to `item.key`, then `item.id`, then the index. */
   keyExtractor?: (item: T, index: number) => string;
   /** Change it to re-render all items, e.g. when `renderItem` reads outside state. */
@@ -59,7 +59,7 @@ export interface MiniFlatListProps<T> {
  * - keeps the first `initialNumToRender` items rendered, for a fast scroll to top;
  * - memoizes items, so a batch renders only the new ones.
  */
-export function MiniFlatList<T>({
+export function TinyFlatList<T>({
   data,
   renderItem,
   keyExtractor = defaultKeyExtractor,
@@ -68,7 +68,7 @@ export function MiniFlatList<T>({
   windowSize = 21,
   maxToRenderPerBatch = 10,
   updateCellsBatchingPeriod = 50,
-}: MiniFlatListProps<T>) {
+}: TinyFlatListProps<T>) {
   const [viewportSize, setViewportSize] = useState(0);
 
   // Read on demand instead of being state, so scrolling does not re-render.
@@ -232,7 +232,7 @@ interface CellProps<T> {
   cellKey: string;
   item: T;
   index: number;
-  renderItem: (info: MiniFlatListRenderItemInfo<T>) => ReactNode;
+  renderItem: (info: TinyFlatListRenderItemInfo<T>) => ReactNode;
   /** Unused here; a new value only makes `memo` re-render the cell. */
   extraData: unknown;
   onCellLayout: (key: string, event: LayoutChangeEvent) => void;
