@@ -15,6 +15,7 @@ When making changes:
 
   Always explain surprising React Native behavior (for example, the final drag offset arriving only in `onScrollEndDrag`). Keep each comment to a line or two and don't restate what the code already says clearly: long or redundant comments hurt readability as much as missing ones.
 - **Don't trade clarity for small wins.** Skip micro-optimizations and clever tricks that make the code harder to follow for little gain. Known flaws such as flicker or blank areas while scrolling fast are acceptable when fixing them would obscure the core idea; document them instead.
+- **Name things after the library being modelled.** When a component follows a real library (see `refs/`), reuse its class, type, function and prop names (for example `RecyclerViewManager`, `RenderStackManager`, `getItemType`), so a reader can find the same pieces in the real source afterwards. Mention the real name in the doc comment when a name has to differ.
 - **Put large techniques in their own component.** Machinery such as cell recycling, velocity-based offset projection or scroll anchoring (see `refs/`) belongs in a separate, clearly named component, not bolted onto an existing simpler one.
 
 ## Reference repos (`refs/`)
