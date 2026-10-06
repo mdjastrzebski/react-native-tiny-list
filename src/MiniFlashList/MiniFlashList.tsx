@@ -43,6 +43,8 @@ export interface MiniFlashListProps<T> {
   data: ReadonlyArray<T>;
   /** Keep it stable (e.g. `useCallback`), or every cell re-renders on every list render. */
   renderItem: (info: MiniFlashListRenderItemInfo<T>) => ReactNode;
+  /** Unique key per item. Lets an item keep its cell when its index changes. */
+  keyExtractor?: (item: T, index: number) => string;
   /** Cells are only recycled between items of the same type. */
   getItemType?: (item: T, index: number) => string;
   /** Extra pixels to render above and below the viewport. */
@@ -63,6 +65,7 @@ export interface MiniFlashListProps<T> {
 export function MiniFlashList<T>({
   data,
   renderItem,
+  keyExtractor,
   getItemType,
   drawDistance = DEFAULT_DRAW_DISTANCE,
 }: MiniFlashListProps<T>) {
@@ -92,8 +95,13 @@ export function MiniFlashList<T>({
   layoutManager.setItemCount(data.length);
   const engagedRange = getEngagedRange();
   engagedRangeRef.current = engagedRange;
-  renderStack.sync(engagedRange, data.length, (index) =>
-    getItemType ? getItemType(data[index] as T, index) : DEFAULT_ITEM_TYPE
+  renderStack.sync(
+    engagedRange,
+    data.length,
+    // FlashList: `RecyclerViewManager.getDataKey`.
+    (index) => keyExtractor?.(data[index] as T, index) ?? String(index),
+    (index) =>
+      getItemType ? getItemType(data[index] as T, index) : DEFAULT_ITEM_TYPE
   );
 
   // Step 4: after every commit, measure synchronously and fix up before paint.

@@ -13,3 +13,8 @@ export {
   type MiniFlashListProps,
   type MiniFlashListRenderItemInfo,
 } from './MiniFlashList';
+export {
+  TinyLegendList,
+  type TinyLegendListProps,
+  type TinyLegendListRenderItemInfo,
+} from './TinyLegendList';

@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import {
   MiniFlashList,
   TinyFlatList,
+  TinyLegendList,
   TinyList,
   type MiniFlashListRenderItemInfo,
 } from 'react-native-tiny-list';
@@ -14,7 +15,12 @@ const DATA: Item[] = Array.from({ length: 10_000 }, (_, i) => ({
   title: `Item ${i}`,
 }));
 
-const LISTS = ['TinyList', 'TinyFlatList', 'MiniFlashList'] as const;
+const LISTS = [
+  'TinyList',
+  'TinyFlatList',
+  'MiniFlashList',
+  'TinyLegendList',
+] as const;
 type ListName = (typeof LISTS)[number];
 
 // Defined outside the component so it stays stable and TinyFlatList can skip
@@ -48,8 +54,10 @@ export default function App() {
         <TinyList data={DATA} renderItem={renderItem} />
       ) : list === 'TinyFlatList' ? (
         <TinyFlatList data={DATA} renderItem={renderItem} />
-      ) : (
+      ) : list === 'MiniFlashList' ? (
         <MiniFlashList data={DATA} renderItem={renderItem} />
+      ) : (
+        <TinyLegendList data={DATA} renderItem={renderItem} />
       )}
     </View>
   );

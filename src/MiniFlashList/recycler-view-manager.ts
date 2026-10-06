@@ -11,6 +11,7 @@ const DEFAULT_ITEM_TYPE = 'default';
 
 export interface RecyclerViewManagerProps<T> {
   data: ReadonlyArray<T>;
+  keyExtractor?: (item: T, index: number) => string;
   getItemType?: (item: T, index: number) => string;
   drawDistance: number;
 }
@@ -108,8 +109,18 @@ export class RecyclerViewManager<T> {
 
   private syncRenderStack() {
     const { data, getItemType } = this.props;
-    this.renderStack.sync(this.engagedRange, data.length, (index) =>
-      getItemType ? getItemType(data[index] as T, index) : DEFAULT_ITEM_TYPE
+    this.renderStack.sync(
+      this.engagedRange,
+      data.length,
+      (index) => this.getDataKey(index),
+      (index) =>
+        getItemType ? getItemType(data[index] as T, index) : DEFAULT_ITEM_TYPE
     );
+  }
+
+  /** The item's stable id: `keyExtractor` output, or the index without one. */
+  private getDataKey(index: number): string {
+    const { data, keyExtractor } = this.props;
+    return keyExtractor?.(data[index] as T, index) ?? String(index);
   }
 }

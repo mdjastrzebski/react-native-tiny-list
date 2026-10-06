@@ -11,6 +11,7 @@ import { MiniFlashList } from 'react-native-tiny-list';
 <MiniFlashList
   data={items}
   renderItem={renderRow} // keep it stable, e.g. defined outside the component
+  keyExtractor={(item) => item.id}
   getItemType={(item) => (item.isHeader ? 'header' : 'row')}
 />;
 ```
@@ -83,12 +84,16 @@ costs almost nothing.
 The render stack is a map from cell key to the row that cell shows. Each
 render it is updated in three moves:
 
-1. **Keep.** A cell whose row is still engaged keeps it. Every other cell
-   becomes free.
+1. **Keep.** A cell whose row is still engaged keeps it, even if the row moved
+   to another index. Every other cell becomes free.
 2. **Reuse.** Each engaged row that has no cell takes a free cell of the
    **same type**, or a brand-new cell if none is free.
 3. **Park.** Free cells that nobody took stay mounted off screen at their old
    position, ready for the next scroll.
+
+How does the list know it is the same row? `keyExtractor` gives every row a
+stable id. Without it, a row is identified by its index, so inserting a row at
+the top makes every cell below show a different row than before.
 
 Why "same type"? A header and a row are different trees of views. Turning a
 header cell into a row means rebuilding it, so nothing is saved. `getItemType`
@@ -124,13 +129,13 @@ React. FlashList is built the same way.
 
 ## Compared to TinyList
 
-| TinyList | MiniFlashList |
-|---|---|
-| Spacer views above and below the rendered rows | Absolutely positioned cells inside one tall view |
-| Rows keyed by index: scrolling destroys old rows and builds new ones | Cells are recycled |
-| Heights arrive from `onLayout` after paint, so rows jump | Heights are measured before paint |
-| Unmeasured rows count as a fixed 50 px | Unmeasured rows use the average measured height |
-| Scans every row to find the window | Binary search |
+| TinyList                                                             | MiniFlashList                                    |
+| -------------------------------------------------------------------- | ------------------------------------------------ |
+| Spacer views above and below the rendered rows                       | Absolutely positioned cells inside one tall view |
+| Rows keyed by index: scrolling destroys old rows and builds new ones | Cells are recycled                               |
+| Heights arrive from `onLayout` after paint, so rows jump             | Heights are measured before paint                |
+| Unmeasured rows count as a fixed 50 px                               | Unmeasured rows use the average measured height  |
+| Scans every row to find the window                                   | Binary search                                    |
 
 ## Implemented from FlashList
 
@@ -140,6 +145,10 @@ Each line names the FlashList source it follows (paths under
 - **Cell recycling with recycle keys.** React keys are cell ids, not row ids.
   Rows that stay engaged keep their key, and the rest reuse free keys
   (`RenderStackManager.sync`).
+- **`keyExtractor`** as the row's stable id, falling back to the index. A row
+  keeps its cell, and the cell's state, when its index changes
+  (`RecyclerViewManager.getDataKey`, `stableIdMap` in `RenderStackManager`).
+  Like in FlashList, layouts are still stored by index.
 - **Recycling only within an item type** (`getItemType`, per-type pools in
   `RenderStackManager`).
 - **Off-screen free cells stay mounted**, ready for reuse (`RenderStackManager`).
@@ -198,8 +207,6 @@ Each line names the FlashList source it follows (paths under
 
 ### Data and scrolling
 
-- `keyExtractor`. Here rows are identified by index, so layouts and keys follow
-  the index.
 - `maintainVisibleContentPosition` (scroll anchoring). Without it, inserting
   rows above the screen makes the content jump.
 - `initialScrollIndex` and the ref API: `scrollToIndex`, `scrollToItem`,
@@ -227,6 +234,9 @@ Each line names the FlashList source it follows (paths under
   heights. Web has the same problem and uses `measure-layout.web.ts`.
 - **`renderItem` must be stable.** An inline arrow function re-renders every
   cell on every list render.
+- **Measured sizes follow the index, not the row**, as in FlashList. After an
+  insert, a row that is not rendered has the size of the row that used to be
+  at its index, until it is rendered and measured again.
 - **Row state survives recycling.** A recycled cell keeps the component state
   of the row it showed before. FlashList offers `useRecyclingState` to reset it.
 - **Blank areas** can still appear when scrolling very fast.

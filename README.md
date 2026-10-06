@@ -76,6 +76,19 @@ measurement before paint (new architecture only). See
 [`src/MiniFlashList/README.md`](src/MiniFlashList/README.md) for a guided tour
 and what was left out.
 
+```tsx
+import { TinyLegendList } from 'react-native-tiny-list';
+
+<TinyLegendList data={items} renderItem={renderRow} />
+```
+
+`TinyLegendList` is a minimal version of Legend List that shows its core
+mechanisms: a pool of absolutely positioned containers, items assigned to the
+containers farthest from the viewport, estimated positions corrected as items
+are measured, and per-container signals so the list never re-renders while
+scrolling. See [`src/TinyLegendList/README.md`](src/TinyLegendList/README.md)
+for a guided tour and what was left out.
+
 
 ## Contributing
 
