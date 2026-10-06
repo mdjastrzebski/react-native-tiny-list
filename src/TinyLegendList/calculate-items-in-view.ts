@@ -19,8 +19,10 @@ import {
 import type { SignalStore } from './signals';
 
 /**
- * Everything the list knows, in one mutable object like Legend List's
- * `InternalState`. Components never read it; they read signals instead.
+ * Legend List: `InternalState`.
+ *
+ * Everything the list knows, in one mutable object. Components never read it;
+ * they read signals instead, so changing it re-renders nothing.
  */
 export interface ListState {
   estimatedItemSize: number;
@@ -30,14 +32,27 @@ export interface ListState {
   scroll: number;
   scrollLength: number;
   scrollDirection: ScrollDirection;
-  /** Items to render, from the last pass. */
+  /**
+   * Legend List: `startBuffered` and `endBuffered`.
+   *
+   * Items to render, from the last pass.
+   */
   range: IndexRange | null;
-  /** Area covered by `range`; while the buffered area stays inside, skip. */
+  /**
+   * Legend List: `scrollForNextCalculateItemsInView`.
+   *
+   * Area covered by `range`; while the buffered area stays inside, skip.
+   */
   coveredArea: Area | undefined;
-  /** Item index shown by each container; `undefined` for an unused one. */
+  /**
+   * Legend List: `containerItemKeys`, which maps item keys to containers.
+   *
+   * Item index shown by each container; `undefined` for an unused one.
+   */
   containerItems: Array<number | undefined>;
 }
 
+/** Legend List: the initial `InternalState` built in `LegendListInner`. */
 export function createListState(): ListState {
   return {
     estimatedItemSize: DEFAULT_ESTIMATED_ITEM_SIZE,
@@ -52,7 +67,12 @@ export function createListState(): ListState {
   };
 }
 
-/** Adapts the list to new data and frees containers of removed items. */
+/**
+ * Legend List: the `dataChanged` path of `calculateItemsInView`, which frees
+ * the containers of removed items through `pendingRemoval`.
+ *
+ * Adapts the list to new data and frees containers of removed items.
+ */
 export function setListItemCount(state: ListState, itemCount: number) {
   setItemCount(state.layout, itemCount);
   state.containerItems = state.containerItems.map((itemIndex) =>
@@ -62,7 +82,9 @@ export function setListItemCount(state: ListState, itemCount: number) {
 }
 
 /**
- * The core of Legend List. Runs after every scroll event, measurement and
+ * Legend List: `calculateItemsInView`.
+ *
+ * The core of the list. Runs after every scroll event, measurement and
  * data change, and publishes the result through signals:
  *
  * 1. recompute positions if a size changed;

@@ -15,6 +15,7 @@ import { Containers, type TinyLegendListRenderItemInfo } from './Containers';
 import { DEFAULT_ESTIMATED_ITEM_SIZE, recordItemSize } from './item-layout';
 import { SignalStore } from './signals';
 
+/** Legend List: `LegendListProps`. */
 export interface TinyLegendListProps<T> {
   data: ReadonlyArray<T>;
   /** Keep it stable (e.g. `useCallback`), or every item re-renders on every list render. */
@@ -26,6 +27,8 @@ export interface TinyLegendListProps<T> {
 }
 
 /**
+ * Legend List: `LegendList`, which renders `LegendListInner`.
+ *
  * A minimal Legend List: a virtualized list built from a pool of absolutely
  * positioned containers.
  *
@@ -53,12 +56,13 @@ export function TinyLegendList<T>({
     calculateItemsInView(state, store);
   }, [state, store, data.length]);
 
-  // Needed to establish the viewport height.
+  // Legend List: `handleLayout`. Needed to establish the viewport height.
   const handleLayout = (event: LayoutChangeEvent) => {
     state.scrollLength = event.nativeEvent.layout.height;
     calculateItemsInView(state, store);
   };
 
+  // Legend List: `onScroll`, which tracks velocity, not only the direction.
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const scroll = event.nativeEvent.contentOffset.y;
     if (scroll !== state.scroll) {
@@ -68,6 +72,7 @@ export function TinyLegendList<T>({
     calculateItemsInView(state, store);
   };
 
+  // Legend List: `updateItemSizes`, called from `useContainerMeasurement`.
   // Measurements correct the estimates, which moves the items below.
   const handleItemLayout = useCallback(
     (index: number, size: number) => {

@@ -1,16 +1,34 @@
-/** Extra pixels rendered around the viewport, split by scroll direction. */
+/**
+ * Legend List: the default of the `drawDistance` prop.
+ *
+ * Extra pixels rendered around the viewport, split by scroll direction.
+ */
 export const DEFAULT_DRAW_DISTANCE = 250;
 
-/** `1` while scrolling down, `-1` while scrolling up, `0` before any scroll. */
+/**
+ * Legend List: `InternalState.scrollBufferDirection`, which is `undefined`
+ * before any scroll.
+ *
+ * `1` while scrolling down, `-1` while scrolling up, `0` before any scroll.
+ */
 export type ScrollDirection = 1 | -1 | 0;
 
-/** A vertical span of the content, in pixels from its top. */
+/**
+ * Legend List: the `{ top, bottom }` of `scrollForNextCalculateItemsInView`,
+ * which uses `null` for an open end where this uses `±Infinity`.
+ *
+ * A vertical span of the content, in pixels from its top.
+ */
 export interface Area {
   top: number;
   bottom: number;
 }
 
-/** First and last item index, both inclusive. */
+/**
+ * Legend List: `InternalState.startBuffered` and `endBuffered`.
+ *
+ * First and last item index, both inclusive.
+ */
 export interface IndexRange {
   startIndex: number;
   endIndex: number;
@@ -25,9 +43,12 @@ export interface ComputeBufferedAreaParams {
 }
 
 /**
+ * Legend List: the `scrollTopBuffered`/`scrollBottomBuffered` step of
+ * `calculateItemsInView`, without its velocity-based projection.
+ *
  * The part of the content that should be rendered: the viewport plus a buffer
- * that leans towards the scroll direction (Legend List renders 1.5 ×
- * `drawDistance` ahead and 0.5 × behind).
+ * that leans towards the scroll direction, 1.5 × `drawDistance` ahead and
+ * 0.5 × behind, because new items come in from ahead.
  */
 export function computeBufferedArea({
   scroll,
@@ -55,11 +76,18 @@ export interface FindItemsInAreaParams {
   positions: ReadonlyArray<number>;
   sizes: ReadonlyArray<number>;
   area: Area;
-  /** Where to start looking, usually the previous first rendered item. */
+  /**
+   * Legend List: the index of `startBufferedId`.
+   *
+   * Where to start looking, usually the previous first rendered item.
+   */
   searchFromIndex: number;
 }
 
 /**
+ * Legend List: the two loops in `calculateItemsInView` that find
+ * `startBuffered` and `endBuffered`.
+ *
  * Finds the items that overlap `area`, or `null` if there are none.
  *
  * Scrolling moves the area only a little between two calls, so the search
@@ -99,6 +127,9 @@ export function findItemsInArea({
 }
 
 /**
+ * Legend List: the `nextTop`/`nextBottom` values that `calculateItemsInView`
+ * stores in `scrollForNextCalculateItemsInView`.
+ *
  * The area covered by the items in `range`. While the buffered area stays
  * inside it, scrolling needs no new items, so the next pass can be skipped.
  * The first and last item cover everything beyond them.
@@ -115,6 +146,11 @@ export function getCoveredArea(
   };
 }
 
+/**
+ * Legend List: the early exit at the start of `calculateItemsInView`.
+ *
+ * Whether `inner` lies entirely inside `outer`.
+ */
 export function containsArea(outer: Area, inner: Area): boolean {
   return inner.top >= outer.top && inner.bottom <= outer.bottom;
 }

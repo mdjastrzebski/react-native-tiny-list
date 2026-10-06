@@ -1,15 +1,30 @@
 import type { IndexRange } from './buffered-range';
 
+/**
+ * Legend List: the arguments of `findAvailableContainers`, which reads each
+ * container's item from its `containerItemKey` signal instead.
+ */
 export interface FindAvailableContainersParams {
   /** Item index shown by each container; `undefined` for an unused one. */
   containerItems: ReadonlyArray<number | undefined>;
-  /** Items in the range that have no container yet. */
+  /**
+   * Legend List: `needNewContainers`.
+   *
+   * Items in the range that have no container yet.
+   */
   neededItems: ReadonlyArray<number>;
-  /** Items in this range keep their containers. */
+  /**
+   * Legend List: `startBuffered` and `endBuffered`.
+   *
+   * Items in this range keep their containers.
+   */
   range: IndexRange;
 }
 
 /**
+ * Legend List: `findAvailableContainers`, which also keeps sticky and
+ * protected containers apart and returns `{ containerIndex, itemIndex }` pairs.
+ *
  * Picks a container for each needed item, in the same order:
  *
  * 1. unused containers first;

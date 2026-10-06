@@ -2,11 +2,16 @@ import { memo, useMemo, type ReactNode } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useSignal, type SignalStore } from './signals';
 
+/** Legend List: `LegendListRenderItemProps`. */
 export interface TinyLegendListRenderItemInfo<T> {
   item: T;
   index: number;
 }
 
+/**
+ * Legend List: `ContainersProps`, which passes a `getRenderedItem` callback
+ * instead of `data` and `renderItem`.
+ */
 interface ContainersProps<T> {
   store: SignalStore;
   data: ReadonlyArray<T>;
@@ -15,6 +20,9 @@ interface ContainersProps<T> {
 }
 
 /**
+ * Legend List: `Containers` and `ContainersInner`, which also render spare
+ * containers ahead of need (`numContainersPooled`).
+ *
  * The content of the scroll view: one view as tall as all items, with the
  * containers positioned absolutely inside it. Re-renders only when the
  * content size or the number of containers changes.
@@ -33,6 +41,8 @@ export function Containers<T>(props: ContainersProps<T>) {
 }
 
 /**
+ * Legend List: `ContainerSlot`, `Container` and `PositionView` in one.
+ *
  * A slot that shows one item at a time. It subscribes to its own item index
  * and position, so moving it re-renders this container alone.
  */
@@ -76,6 +86,7 @@ function Container<T>({
 }
 
 // Memoized, so a list render re-renders a container only if its props changed.
+// The cast keeps the generic signature, like Legend List's `typedMemo`.
 const MemoContainer = memo(Container) as typeof Container;
 
 const styles = StyleSheet.create({

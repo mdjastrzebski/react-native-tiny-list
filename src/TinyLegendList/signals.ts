@@ -1,6 +1,8 @@
 import { useCallback, useSyncExternalStore } from 'react';
 
 /**
+ * Legend List: `ListenerType`, which has many more names.
+ *
  * Names of the values the list publishes to its components:
  * - `totalSize`: height of the content view, the sum of all item sizes.
  * - `numContainers`: how many containers exist.
@@ -16,11 +18,13 @@ export type SignalName =
 type Listener = () => void;
 
 /**
- * A tiny store of named values, like Legend List's `set$`/`peek$`/`useArr$`.
+ * Legend List: the `values` and `listeners` of `StateContext`, used through
+ * free functions: `peek` is `peek$`, `set` is `set$`, `subscribe` is `listen$`.
  *
- * Each component subscribes only to the values it shows, so moving one
- * container re-renders that container and nothing else. The list component
- * itself subscribes to nothing and never re-renders while scrolling.
+ * A tiny store of named values. Each component subscribes only to the values
+ * it shows, so moving one container re-renders that container and nothing
+ * else. The list component itself subscribes to nothing and never re-renders
+ * while scrolling.
  */
 export class SignalStore {
   private values = new Map<SignalName, number | undefined>();
@@ -40,6 +44,7 @@ export class SignalStore {
     this.listeners.get(name)?.forEach((listener) => listener());
   }
 
+  /** Calls `listener` whenever the value changes; returns an unsubscribe. */
   subscribe(name: SignalName, listener: Listener): () => void {
     let listeners = this.listeners.get(name);
     if (!listeners) {
@@ -51,7 +56,11 @@ export class SignalStore {
   }
 }
 
-/** Reads a value and re-renders the component whenever it changes. */
+/**
+ * Legend List: `useArr$`, which reads several values at once.
+ *
+ * Reads a value and re-renders the component whenever it changes.
+ */
 export function useSignal(
   store: SignalStore,
   name: SignalName
