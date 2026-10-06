@@ -43,7 +43,9 @@ As you scroll, the window moves: items that leave it unmount, items that enter i
    - items that start below the window go into `sizerAfter`,
    - everything in between is rendered.
 4. **Guess unknown sizes.** An item that has never been rendered has no known height, so it counts as `DEFAULT_ITEM_SIZE` (50 px).
-5. **Measure rendered items.** Each rendered item is wrapped in a `View` whose `onLayout` reports its real height. Heights are cached by index. When one differs from the cached value, the list re-renders, and the spacers and window are recomputed with the better number.
+5. **Measure rendered items.** Each rendered item is wrapped in a `View` whose `onLayout` reports its real height. Heights are cached by index. When one differs from the cached value, the spacers and window are recomputed with the better number.
+
+The viewport size, scroll offset and item heights are kept in refs. Only the render window is React state, so the list re-renders only when the window or spacers actually change.
 
 That's the whole algorithm: measure, track, pick a window, guess, correct.
 
@@ -55,8 +57,8 @@ These are expected, and left in on purpose to keep the code readable:
 - **Jumps.** When an item's real height differs from the 50 px guess, the spacer above it changes size and the content shifts.
 - **The first frame is empty.** Nothing renders until the viewport has been measured.
 - **Sizes are cached by index, not by item.** After inserting, removing or reordering items, the cached heights belong to the wrong items until they are measured again.
-- **Every scroll event re-renders the list.** Each scroll event (up to about one every 16 ms) recomputes the window and re-renders every visible item.
-- **Finding the window is a linear scan.** It walks every item on each render, which is O(n).
+- **Every window change re-renders every visible item.** Each scroll event (up to about one every 16 ms) recomputes the window. When it moves, every rendered item re-renders, not only the ones entering or leaving.
+- **Finding the window is a linear scan.** It walks every item on each scroll event, which is O(n).
 
 ## Compared with React Native's `FlatList`
 

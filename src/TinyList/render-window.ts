@@ -12,6 +12,14 @@ export interface RenderWindow {
   sizerAfter: number;
 }
 
+/** Window with no items and no spacers, used before anything is measured. */
+export const EMPTY_RENDER_WINDOW: RenderWindow = {
+  startIndex: 0,
+  endIndex: 0,
+  sizerBefore: 0,
+  sizerAfter: 0,
+};
+
 export interface ComputeRenderWindowParams {
   itemCount: number;
   /** Measured item sizes, indexed by item; `undefined` when not measured yet. */
@@ -69,4 +77,17 @@ export function computeRenderWindow({
     sizerBefore,
     sizerAfter,
   };
+}
+
+/** True when both windows render the same items with the same sizers. */
+export function areRenderWindowsEqual(
+  a: RenderWindow,
+  b: RenderWindow
+): boolean {
+  return (
+    a.startIndex === b.startIndex &&
+    a.endIndex === b.endIndex &&
+    a.sizerBefore === b.sizerBefore &&
+    a.sizerAfter === b.sizerAfter
+  );
 }

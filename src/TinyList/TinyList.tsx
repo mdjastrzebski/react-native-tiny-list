@@ -1,4 +1,4 @@
-import { useReducer, useRef, useState, type ReactNode } from 'react';
+import { useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import {
   ScrollView,
   View,
@@ -6,7 +6,11 @@ import {
   type NativeScrollEvent,
   type NativeSyntheticEvent,
 } from 'react-native';
-import { computeRenderWindow } from './render-window';
+import {
+  areRenderWindowsEqual,
+  computeRenderWindow,
+  EMPTY_RENDER_WINDOW,
+} from './render-window';
 
 export interface TinyListRenderItemInfo<T> {
   item: T;
@@ -26,25 +30,40 @@ export interface TinyListProps<T> {
  * areas and jumps while scrolling fast or when estimates are off.
  */
 export function TinyList<T>({ data, renderItem }: TinyListProps<T>) {
-  const [scrollOffset, setScrollOffset] = useState(0);
-  const [viewportSize, setViewportSize] = useState(0);
-
+  // Raw measurements live in refs: changing them alone should not re-render
+  const scrollOffsetRef = useRef(0);
+  const viewportSizeRef = useRef(0);
   const sizesRef = useRef<Array<number | undefined>>([]);
-  const [, forceRender] = useReducer((count: number) => count + 1, 0);
 
-  // Which items to actuall render, what spacer to put before and after them
-  const { startIndex, endIndex, sizerBefore, sizerAfter } = computeRenderWindow(
-    {
+  // Which items to actually render, what spacer to put before and after them.
+  // Nothing is measured yet on mount, so this starts as an empty window.
+  const [renderWindow, setRenderWindow] = useState(EMPTY_RENDER_WINDOW);
+  const { startIndex, sizerBefore, sizerAfter } = renderWindow;
+
+  // Recompute the window from the latest measurements. Setting state only when
+  // the window changed avoids needless re-renders.
+  const updateRenderWindow = () => {
+    const next = computeRenderWindow({
       itemCount: data.length,
       sizes: sizesRef.current,
-      scrollOffset,
-      viewportSize,
+      scrollOffset: scrollOffsetRef.current,
+      viewportSize: viewportSizeRef.current,
+    });
+    if (!areRenderWindowsEqual(renderWindow, next)) {
+      setRenderWindow(next);
     }
-  );
+  };
+
+  // New data can change the item count, so the window must be recomputed.
+  // A layout effect runs before paint, so the stale spacers are never shown.
+  // Only `data` matters; re-running on each window change would be wasted.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useLayoutEffect(updateRenderWindow, [data]);
 
   // Needed to establish viewport height
   const handleLayout = (event: LayoutChangeEvent) => {
-    setViewportSize(event.nativeEvent.layout.height);
+    viewportSizeRef.current = event.nativeEvent.layout.height;
+    updateRenderWindow();
   };
 
   // Needed to get actual item size
@@ -52,16 +71,19 @@ export function TinyList<T>({ data, renderItem }: TinyListProps<T>) {
     const size = event.nativeEvent.layout.height;
     if (sizesRef.current[index] !== size) {
       sizesRef.current[index] = size;
-      forceRender();
+      updateRenderWindow();
     }
   };
 
   // Needed to get the current scroll positon
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-    setScrollOffset(event.nativeEvent.contentOffset.y);
+    scrollOffsetRef.current = event.nativeEvent.contentOffset.y;
+    updateRenderWindow();
   };
 
-  // Items we will actually render
+  // Items we will actually render. The window is from before `data` changed
+  // until the layout effect above runs, so clamp it to the current item count.
+  const endIndex = Math.min(renderWindow.endIndex, data.length);
   const items: ReactNode[] = [];
   for (let index = startIndex; index < endIndex; index++) {
     items.push(
