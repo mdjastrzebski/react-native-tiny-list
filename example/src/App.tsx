@@ -7,13 +7,11 @@ import {
   type MiniFlashListRenderItemInfo,
 } from 'react-native-tiny-list';
 
-type Item = { id: number; title: string; isHeader: boolean };
+type Item = { id: number; title: string };
 
-// Every 20th item is a section header, so MiniFlashList has two item types.
 const DATA: Item[] = Array.from({ length: 10_000 }, (_, i) => ({
   id: i,
-  title: i % 20 === 0 ? `Section ${i / 20}` : `Item ${i}`,
-  isHeader: i % 20 === 0,
+  title: `Item ${i}`,
 }));
 
 const LISTS = ['TinyList', 'TinyFlatList', 'MiniFlashList'] as const;
@@ -22,14 +20,6 @@ type ListName = (typeof LISTS)[number];
 // Defined outside the component so it stays stable and TinyFlatList can skip
 // re-rendering unchanged items.
 function renderItem({ item, index }: MiniFlashListRenderItemInfo<Item>) {
-  if (item.isHeader) {
-    return (
-      <View style={styles.header}>
-        <Text style={styles.headerText}>{item.title}</Text>
-      </View>
-    );
-  }
-
   // Vary heights to exercise measurement.
   return (
     <View style={[styles.item, { height: 40 + (index % 5) * 15 }]}>
@@ -37,8 +27,6 @@ function renderItem({ item, index }: MiniFlashListRenderItemInfo<Item>) {
     </View>
   );
 }
-
-const getItemType = (item: Item) => (item.isHeader ? 'header' : 'row');
 
 export default function App() {
   const [list, setList] = useState<ListName>('MiniFlashList');
@@ -61,11 +49,7 @@ export default function App() {
       ) : list === 'TinyFlatList' ? (
         <TinyFlatList data={DATA} renderItem={renderItem} />
       ) : (
-        <MiniFlashList
-          data={DATA}
-          renderItem={renderItem}
-          getItemType={getItemType}
-        />
+        <MiniFlashList data={DATA} renderItem={renderItem} />
       )}
     </View>
   );
@@ -88,15 +72,6 @@ const styles = StyleSheet.create({
   },
   activeTab: {
     backgroundColor: '#e8e8e8',
-  },
-  header: {
-    justifyContent: 'center',
-    height: 32,
-    paddingHorizontal: 16,
-    backgroundColor: '#f2f2f2',
-  },
-  headerText: {
-    fontWeight: 'bold',
   },
   item: {
     justifyContent: 'center',
