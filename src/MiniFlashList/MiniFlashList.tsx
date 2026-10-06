@@ -134,7 +134,7 @@ export function MiniFlashList<T>({
     [layoutManager]
   );
 
-  // Unlike NaiveList, render only when a different set of items is needed,
+  // Render only when a different set of items is needed,
   // not on every scroll event.
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     scrollOffsetRef.current = event.nativeEvent.contentOffset.y;

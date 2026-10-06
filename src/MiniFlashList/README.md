@@ -6,7 +6,7 @@ It keeps the ideas that make FlashList fast and leaves out everything else, so
 you can read the whole engine in a few short files.
 
 ```tsx
-import { MiniFlashList } from 'react-native-simple-list';
+import { MiniFlashList } from 'react-native-tiny-list';
 
 <MiniFlashList
   data={items}
@@ -15,11 +15,11 @@ import { MiniFlashList } from 'react-native-simple-list';
 />;
 ```
 
-If you are new to virtualized lists, read [`NaiveList`](../NaiveList) first.
+If you are new to virtualized lists, read [`TinyList`](../TinyList) first.
 
 ## The big idea: reuse the cells
 
-A list of 10,000 rows never shows more than a screenful at once. `NaiveList`
+A list of 10,000 rows never shows more than a screenful at once. `TinyList`
 already renders only the rows near the screen. But as you scroll, it throws
 away the rows that leave and builds new ones from scratch for the rows that
 arrive. Building native views is expensive, and it happens many times a second.
@@ -121,15 +121,14 @@ means "render again". This lets the scroll handler and the layout effect
 change things immediately, without waiting for state updates to flow through
 React. FlashList is built the same way.
 
-## Compared to NaiveList
+## Compared to TinyList
 
-| NaiveList | MiniFlashList |
+| TinyList | MiniFlashList |
 |---|---|
 | Spacer views above and below the rendered rows | Absolutely positioned cells inside one tall view |
 | Rows keyed by index: scrolling destroys old rows and builds new ones | Cells are recycled |
 | Heights arrive from `onLayout` after paint, so rows jump | Heights are measured before paint |
 | Unmeasured rows count as a fixed 50 px | Unmeasured rows use the average measured height |
-| Re-renders on every scroll event | Re-renders only when the engaged rows change |
 | Scans every row to find the window | Binary search |
 
 ## Implemented from FlashList
