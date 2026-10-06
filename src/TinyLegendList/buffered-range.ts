@@ -146,11 +146,7 @@ export function getCoveredArea(
   };
 }
 
-/**
- * Legend List: the early exit at the start of `calculateItemsInView`.
- *
- * Whether `inner` lies entirely inside `outer`.
- */
+/** Legend List: the early exit at the start of `calculateItemsInView`. */
 export function containsArea(outer: Area, inner: Area): boolean {
   return inner.top >= outer.top && inner.bottom <= outer.bottom;
 }

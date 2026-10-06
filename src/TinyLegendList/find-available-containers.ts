@@ -7,7 +7,6 @@ import type { IndexRange } from './buffered-range';
 export interface FindAvailableContainersParams {
   /** Item key shown by each container; `undefined` for an unused one. */
   containerItems: ReadonlyArray<string | undefined>;
-  /** Index of each item, by key. */
   indexByKey: ReadonlyMap<string, number>;
   /**
    * Legend List: `needNewContainers`.

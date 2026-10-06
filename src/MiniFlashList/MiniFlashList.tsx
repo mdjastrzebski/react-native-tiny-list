@@ -98,8 +98,7 @@ export function MiniFlashList<T>({
   renderStack.sync(
     engagedRange,
     data.length,
-    // FlashList: `RecyclerViewManager.getDataKey`. Without `keyExtractor`,
-    // an item is identified by its index.
+    // FlashList: `RecyclerViewManager.getDataKey`.
     (index) => keyExtractor?.(data[index] as T, index) ?? String(index),
     (index) =>
       getItemType ? getItemType(data[index] as T, index) : DEFAULT_ITEM_TYPE

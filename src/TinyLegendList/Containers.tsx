@@ -85,7 +85,6 @@ function Container<T>({
   );
 }
 
-// Memoized, so a list render re-renders a container only if its props changed.
 // The cast keeps the generic signature, like Legend List's `typedMemo`.
 const MemoContainer = memo(Container) as typeof Container;
 

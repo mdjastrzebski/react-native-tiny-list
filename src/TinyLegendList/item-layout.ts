@@ -22,7 +22,6 @@ export interface ItemLayout {
    * Key of each item, from `keyExtractor`.
    */
   keys: string[];
-  /** Index of each item, by key. */
   indexByKey: Map<string, number>;
   /**
    * Legend List: `sizesKnown`.
@@ -131,9 +130,8 @@ export function recordItemSize(
     return false;
   }
 
-  // Fold the measurement into the average used to estimate unmeasured items,
-  // replacing this item's previous measurement if it had one. Sizes of 0 stay
-  // out: a row whose `renderItem` returns null says nothing about other rows.
+  // Fold the size into the average used for estimates. Sizes of 0 stay out:
+  // a row whose `renderItem` returns null says nothing about other rows.
   // Like Legend List, a row that shrinks to 0 keeps its old size in the average.
   if (size > 0) {
     if (previousSize !== undefined && previousSize > 0) {
@@ -151,11 +149,7 @@ export function recordItemSize(
   return true;
 }
 
-/**
- * Legend List: the average update in `updateOneItemSize`.
- *
- * Adds one size to a running average.
- */
+/** Legend List: the average update in `updateOneItemSize`. */
 function addToAverage(average: ItemLayout['averageSize'], size: number) {
   average.value = (average.value * average.count + size) / (average.count + 1);
   average.count += 1;
