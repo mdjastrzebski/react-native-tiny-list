@@ -5,8 +5,10 @@ import type { IndexRange } from './buffered-range';
  * container's item from its `containerItemKey` signal instead.
  */
 export interface FindAvailableContainersParams {
-  /** Item index shown by each container; `undefined` for an unused one. */
-  containerItems: ReadonlyArray<number | undefined>;
+  /** Item key shown by each container; `undefined` for an unused one. */
+  containerItems: ReadonlyArray<string | undefined>;
+  /** Index of each item, by key. */
+  indexByKey: ReadonlyMap<string, number>;
   /**
    * Legend List: `needNewContainers`.
    *
@@ -34,11 +36,14 @@ export interface FindAvailableContainersParams {
  */
 export function findAvailableContainers({
   containerItems,
+  indexByKey,
   neededItems,
   range,
 }: FindAvailableContainersParams): number[] {
   const candidates: Array<{ container: number; distance: number }> = [];
-  containerItems.forEach((itemIndex, container) => {
+  containerItems.forEach((itemKey, container) => {
+    const itemIndex =
+      itemKey === undefined ? undefined : indexByKey.get(itemKey);
     if (itemIndex === undefined) {
       candidates.push({ container, distance: Infinity });
     } else if (itemIndex < range.startIndex) {

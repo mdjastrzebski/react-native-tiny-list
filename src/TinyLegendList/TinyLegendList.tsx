@@ -1,4 +1,10 @@
-import { useCallback, useLayoutEffect, useState, type ReactNode } from 'react';
+import {
+  useCallback,
+  useLayoutEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from 'react';
 import {
   ScrollView,
   type LayoutChangeEvent,
@@ -6,13 +12,10 @@ import {
   type NativeSyntheticEvent,
 } from 'react-native';
 import { DEFAULT_DRAW_DISTANCE } from './buffered-range';
-import {
-  calculateItemsInView,
-  createListState,
-  setListItemCount,
-} from './calculate-items-in-view';
+import { calculateItemsInView } from './calculate-items-in-view';
 import { Containers, type TinyLegendListRenderItemInfo } from './Containers';
 import { DEFAULT_ESTIMATED_ITEM_SIZE, recordItemSize } from './item-layout';
+import { createListState, setListData } from './list-state';
 import { SignalStore } from './signals';
 
 /** Legend List: `LegendListProps`. */
@@ -20,6 +23,11 @@ export interface TinyLegendListProps<T> {
   data: ReadonlyArray<T>;
   /** Keep it stable (e.g. `useCallback`), or every item re-renders on every list render. */
   renderItem: (info: TinyLegendListRenderItemInfo<T>) => ReactNode;
+  /**
+   * Unique key per item. Measured sizes and containers follow the key, so
+   * they survive inserts and reorders. Defaults to the index.
+   */
+  keyExtractor?: (item: T, index: number) => string;
   /** Size assumed for items before the first one is measured. */
   estimatedItemSize?: number;
   /** Extra pixels to render around the viewport, mostly ahead of the scroll. */
@@ -41,6 +49,7 @@ export interface TinyLegendListProps<T> {
 export function TinyLegendList<T>({
   data,
   renderItem,
+  keyExtractor = keyByIndex,
   estimatedItemSize = DEFAULT_ESTIMATED_ITEM_SIZE,
   drawDistance = DEFAULT_DRAW_DISTANCE,
 }: TinyLegendListProps<T>) {
@@ -50,11 +59,14 @@ export function TinyLegendList<T>({
   state.estimatedItemSize = estimatedItemSize;
   state.drawDistance = drawDistance;
 
-  // New item count: extend or trim the layout before the frame is painted.
+  // Legend List: `getId`, called lazily and cached in `idCache`.
+  const keys = useMemo(() => data.map(keyExtractor), [data, keyExtractor]);
+
+  // New data: update the layout and the containers before the frame is painted.
   useLayoutEffect(() => {
-    setListItemCount(state, data.length);
+    setListData(state, data, keys);
     calculateItemsInView(state, store);
-  }, [state, store, data.length]);
+  }, [state, store, data, keys]);
 
   // Legend List: `handleLayout`. Needed to establish the viewport height.
   const handleLayout = (event: LayoutChangeEvent) => {
@@ -75,8 +87,8 @@ export function TinyLegendList<T>({
   // Legend List: `updateItemSizes`, called from `useContainerMeasurement`.
   // Measurements correct the estimates, which moves the items below.
   const handleItemLayout = useCallback(
-    (index: number, size: number) => {
-      if (recordItemSize(state.layout, index, size)) {
+    (itemKey: string, size: number) => {
+      if (recordItemSize(state.layout, itemKey, size)) {
         calculateItemsInView(state, store);
       }
     },
@@ -94,10 +106,14 @@ export function TinyLegendList<T>({
     >
       <Containers
         store={store}
-        data={data}
         renderItem={renderItem}
         onItemLayout={handleItemLayout}
       />
     </ScrollView>
   );
+}
+
+/** Legend List: the index fallback in `getId`, used without `keyExtractor`. */
+function keyByIndex(_item: unknown, index: number): string {
+  return String(index);
 }

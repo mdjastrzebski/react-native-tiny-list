@@ -5,6 +5,7 @@ import {
   screen,
   userEvent,
 } from '@testing-library/react-native';
+import { useEffect } from 'react';
 import { Text } from 'react-native';
 import { TinyLegendList } from '../TinyLegendList';
 import type { TinyLegendListRenderItemInfo } from '../Containers';
@@ -101,6 +102,67 @@ describe('TinyLegendList', () => {
 
     expect(screen.getByText('Item 1 #1')).toBeOnTheScreen();
     expect(renderedItemCount()).toBe(2);
+  });
+
+  it('keeps measured sizes with their item when an item is inserted', async () => {
+    const keyExtractor = (item: Item) => item.title;
+    const { rerender, root } = await render(
+      <TinyLegendList
+        data={DATA}
+        renderItem={renderItem}
+        keyExtractor={keyExtractor}
+      />
+    );
+    await fireEvent(root!, 'layout', layoutEvent(500));
+    await fireEvent(screen.getByText('Item 0 #0'), 'layout', layoutEvent(30));
+    await fireEvent(screen.getByText('Item 1 #1'), 'layout', layoutEvent(50));
+
+    await rerender(
+      <TinyLegendList
+        data={[{ title: 'New' }, ...DATA]}
+        renderItem={renderItem}
+        keyExtractor={keyExtractor}
+      />
+    );
+
+    // `New` is estimated at the average (40); the others keep their sizes.
+    expect(screen.getByText('Item 0 #1').parent).toHaveStyle({ top: 40 });
+    expect(screen.getByText('Item 1 #2').parent).toHaveStyle({ top: 70 });
+    expect(screen.getByText('Item 2 #3').parent).toHaveStyle({ top: 120 });
+  });
+
+  it('keeps items mounted when an item is inserted above them', async () => {
+    const shown = jest.fn();
+    function Row({ title }: { title: string }) {
+      useEffect(() => {
+        shown(title);
+      }, [title]);
+      return <Text>{title}</Text>;
+    }
+    const renderRow = ({ item }: TinyLegendListRenderItemInfo<Item>) => (
+      <Row title={item.title} />
+    );
+    const keyExtractor = (item: Item) => item.title;
+    const { rerender, root } = await render(
+      <TinyLegendList
+        data={DATA}
+        renderItem={renderRow}
+        keyExtractor={keyExtractor}
+      />
+    );
+    await fireEvent(root!, 'layout', layoutEvent(500));
+    shown.mockClear();
+
+    await rerender(
+      <TinyLegendList
+        data={[{ title: 'New' }, ...DATA]}
+        renderItem={renderRow}
+        keyExtractor={keyExtractor}
+      />
+    );
+
+    // Only the new item renders; no container shows another item, even briefly.
+    expect(shown.mock.calls).toEqual([['New']]);
   });
 
   it('renders nothing for empty data', async () => {

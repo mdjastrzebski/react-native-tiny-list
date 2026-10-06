@@ -10,6 +10,7 @@ import { TinyLegendList } from 'react-native-tiny-list';
 <TinyLegendList
   data={items}
   renderItem={renderRow} // keep it stable, e.g. defined outside the component
+  keyExtractor={(item) => item.id}
   estimatedItemSize={60}
 />;
 ```
@@ -23,11 +24,12 @@ A list of 10,000 rows can't render 10,000 views. It has to render only the
 rows near the screen and pretend the rest are there. Legend List does this
 with three tricks:
 
-1. **A fixed set of "containers".** Instead of mounting and unmounting rows,
-   the list renders a small, stable set of empty boxes (about one screen's
-   worth plus a buffer). Each box shows one row at a time and is placed with
-   `position: absolute` at that row's offset. When a row scrolls far away,
-   its box is handed to a row that is scrolling in.
+1. **A fixed set of containers.** Instead of mounting and unmounting rows,
+   the list renders a small, stable set of empty wrapper views, called
+   containers (about one screen's worth plus a buffer). Each container shows
+   one row at a time and is placed with `position: absolute` at that row's
+   offset. When a row scrolls far away, its container is handed to a row
+   that is scrolling in.
 
 2. **Guess first, then correct.** The list must know where every row is,
    even rows it has never rendered, to size the scroll content. So it
@@ -35,10 +37,10 @@ with three tricks:
    When a row renders and reports its real height, the list fixes the
    positions of the rows below it.
 
-3. **Only the boxes re-render.** The list itself never re-renders while you
-   scroll. Each box listens to just two values, "which row do I show" and
-   "where am I", and re-renders on its own when one of them changes. A box
-   that only moves doesn't even re-run `renderItem`.
+3. **Only the containers re-render.** The list itself never re-renders
+   while you scroll. Each container listens to just two values, "which row
+   do I show" and "where am I", and re-renders on its own when one of them
+   changes. A container that only moves doesn't even re-run `renderItem`.
 
 ## One scroll, step by step
 
@@ -60,15 +62,16 @@ Say the viewport is 500 px tall, rows are about 100 px, and you scroll from
 4. **Find the rows in the area.** Start at the first row from the last pass
    and walk up or down until you reach the area's edges. A small scroll
    moves only a few rows, so this takes a few steps.
-5. **Give each new row a box.** Rows without a box take, in order: an
-   unused box; or the box of the row farthest outside the area (the nearest
-   ones may scroll back soon); or a brand new box.
-6. **Tell the boxes.** Publish each box's row and position. Only the boxes
-   whose values changed re-render.
+5. **Give each new row a container.** Rows without a container take, in
+   order: an unused container; or the container of the row farthest outside
+   the area (the nearest ones may scroll back soon); or a brand new
+   container.
+6. **Tell the containers.** Publish each container's row and position. Only
+   the containers whose values changed re-render.
 
-Rows that leave the area are not unmounted. They stay in their box, off
-screen, until the box is needed. Scroll back a little and they are still
-there, with nothing to render.
+Rows that leave the area are not unmounted. They stay in their container,
+off screen, until the container is needed. Scroll back a little and they are
+still there, with nothing to render.
 
 ## Where each step lives
 
@@ -76,10 +79,11 @@ there, with nothing to render.
 | -------------------------------------------------------------- | --------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
 | [`item-layout.ts`](item-layout.ts)                             | Measured and estimated sizes, cached positions, the running average   | `src/core/updateItemPositions.ts`, `src/core/updateItemSizes.ts`, `src/utils/getItemSize.ts`  |
 | [`buffered-range.ts`](buffered-range.ts)                       | Buffered area, finding the rows in it, the "nothing new needed" check | The window loop and `scrollForNextCalculateItemsInView` in `src/core/calculateItemsInView.ts` |
-| [`find-available-containers.ts`](find-available-containers.ts) | Picks a box for each new row                                          | `src/utils/findAvailableContainers.ts`                                                        |
-| [`calculate-items-in-view.ts`](calculate-items-in-view.ts)     | The pass that ties the steps together, and the list's mutable state   | `src/core/calculateItemsInView.ts`, `InternalState` in `src/types.internal.ts`                |
-| [`signals.ts`](signals.ts)                                     | A tiny store that lets each box listen to its own values              | `set$` / `peek$` / `useArr$` in `src/state/state.tsx`                                         |
-| [`Containers.tsx`](Containers.tsx)                             | The content view and the boxes                                        | `src/components/Containers.tsx`, `ContainerSlot.tsx`, `Container.tsx`, `PositionView.tsx`     |
+| [`find-available-containers.ts`](find-available-containers.ts) | Picks a container for each new row                                    | `src/utils/findAvailableContainers.ts`                                                        |
+| [`list-state.ts`](list-state.ts)                               | The list's mutable state, and adapting it to new data                 | `InternalState` in `src/types.internal.ts`                                                    |
+| [`calculate-items-in-view.ts`](calculate-items-in-view.ts)     | The pass that ties the steps together                                 | `src/core/calculateItemsInView.ts`                                                            |
+| [`signals.ts`](signals.ts)                                     | A tiny store that lets each container listen to its own values        | `set$` / `peek$` / `useArr$` in `src/state/state.tsx`                                         |
+| [`Containers.tsx`](Containers.tsx)                             | The content view and the containers                                   | `src/components/Containers.tsx`, `ContainerSlot.tsx`, `Container.tsx`, `PositionView.tsx`     |
 | [`TinyLegendList.tsx`](TinyLegendList.tsx)                     | Wires scroll, viewport and row measurements to the pass               | `src/components/LegendList.tsx`                                                               |
 
 ## What is implemented
@@ -87,21 +91,24 @@ there, with nothing to render.
 Each item is a simplified version of the Legend List mechanism named after
 the colon.
 
-- **Container pool with absolute positioning:** boxes keyed by container id
+- **Container pool with absolute positioning:** containers keyed by id
   inside one view as tall as the content (`Containers`, `ContainerSlot`,
   `PositionView`).
-- **Container reuse:** unused boxes first, then boxes out of range, farthest
-  first, then new boxes (`findAvailableContainers`).
-- **Remount on reuse:** a reused box remounts its row's views, so no state
-  leaks from the previous row. This is Legend List's default,
+- **Container reuse:** unused containers first, then containers out of
+  range, farthest first, then new containers (`findAvailableContainers`).
+- **Remount on reuse:** a reused container remounts its row's views, so no
+  state leaks from the previous row. This is Legend List's default,
   `recycleItems={false}`.
-- **Out-of-range rows stay mounted:** a row leaves only when its box is
-  reused.
+- **Out-of-range rows stay mounted:** a row leaves only when its container
+  is reused.
 - **Estimate-first sizing:** `estimatedItemSize` (default 100) before any
   measurement, then the running average of measured rows (`getItemSize`,
-  `averageSizes`).
+  `averageSizes`). Rows measured at 0 don't count towards it.
 - **Measured vs. counted sizes:** `knownSizes` and `sizes`, like
   `sizesKnown` and `sizes`.
+- **Item keys:** `keyExtractor` (default: the index). Measured sizes are
+  stored by key and containers hold keys, so inserting or reordering rows
+  keeps their sizes and mounted views (`idCache`, `indexByKey`).
 - **Incremental position updates:** positions recompute only from the first
   changed row (`positionRecalculationStartIndex`).
 - **Direction-biased buffer:** 1.5 × `drawDistance` ahead, 0.5 × behind
@@ -110,12 +117,13 @@ the colon.
 - **Window search from the previous start:** walks from the last first row
   instead of scanning (`startBufferedId`).
 - **Skip the pass while covered:** `scrollForNextCalculateItemsInView`.
-- **Signals:** per-container item index and position, plus `totalSize` and
-  `numContainers`. The list component subscribes to nothing.
-- **Memoized row content:** moving a box doesn't re-run `renderItem`
+- **Signals:** per-container item key, index, data and position, plus
+  `totalSize` and `numContainers`. The list component subscribes to nothing,
+  and new data re-renders only the containers whose item changed.
+- **Memoized row content:** moving a container doesn't re-run `renderItem`
   (`renderedItemInfo` in `Container`).
-- **Data length changes:** the layout grows or shrinks, and boxes of removed
-  rows are freed.
+- **Data changes:** positions recompute from the first changed key, and
+  containers of removed rows are freed.
 
 ## What is not implemented
 
@@ -131,9 +139,9 @@ see.
 
 **Sizing and measurement**
 
-- Measuring all changed boxes in one layout-effect pass after each commit
-  (new architecture). Here each box reports through its own `onLayout`, a
-  frame after paint.
+- Measuring all changed containers in one layout-effect pass after each
+  commit (new architecture). Here each container reports through its own
+  `onLayout`, a frame after paint.
 - `getFixedItemSize`, and per-type averages via `getItemType`.
 - Filtering out sub-pixel measurement noise.
 - `experimental_hideItemsUntilMeasured`.
@@ -144,20 +152,18 @@ see.
   fast.
 - A smaller first-render draw distance and the `"visible-first"` mode for
   big jumps.
-- Pre-allocating and pre-rendering spare boxes on mount
+- Pre-allocating and pre-rendering spare containers on mount
   (`numContainersPooled`).
 - Stopping the position sweep early while scrolling fast.
 
 **Containers**
 
 - `recycleItems={true}`, with `useRecyclingState` and `useRecyclingEffect`.
-- Matching boxes by `getItemType`.
+- Matching containers by `getItemType`.
 - `alwaysRender`.
 
 **Data and identity**
 
-- `keyExtractor`: sizes are cached by index, so inserting rows shifts every
-  cached size.
 - `dataKey`, `dataVersion`, `extraData`, `itemsAreEqual`, children mode.
 
 **Initial scroll and imperative API**
@@ -191,8 +197,8 @@ see.
 
 ## Known limitations
 
-- `renderItem` must be stable. An inline arrow re-renders every box on
-  every list render, because boxes are memoized on their props.
+- `renderItem` must be stable. An inline arrow re-renders every container on
+  every list render, because containers are memoized on their props.
 - New rows can briefly appear at their estimated positions, because their
   heights arrive in `onLayout` after paint.
 - Scrolling up into rows that were never measured (after a fast fling)

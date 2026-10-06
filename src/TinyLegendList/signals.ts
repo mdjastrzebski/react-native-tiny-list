@@ -1,19 +1,27 @@
 import { useCallback, useSyncExternalStore } from 'react';
 
 /**
- * Legend List: `ListenerType`, which has many more names.
+ * Legend List: `ListenerTypeValueMap`, which has many more names.
  *
- * Names of the values the list publishes to its components:
+ * The values the list publishes to its components, by name:
  * - `totalSize`: height of the content view, the sum of all item sizes.
  * - `numContainers`: how many containers exist.
- * - `containerItemIndex${id}`: index of the item a container shows.
+ * - `containerItemKey${id}`: key of the item a container shows.
+ * - `containerItemIndex${id}`: index of that item in `data`.
+ * - `containerItemData${id}`: the item itself, `data[index]`.
  * - `containerPosition${id}`: offset of that container from the content top.
  */
-export type SignalName =
-  | 'totalSize'
-  | 'numContainers'
-  | `containerItemIndex${number}`
-  | `containerPosition${number}`;
+export interface SignalValues {
+  totalSize: number;
+  numContainers: number;
+  [name: `containerItemKey${number}`]: string;
+  [name: `containerItemIndex${number}`]: number;
+  [name: `containerItemData${number}`]: unknown;
+  [name: `containerPosition${number}`]: number;
+}
+
+/** Legend List: `ListenerType`. */
+export type SignalName = keyof SignalValues;
 
 type Listener = () => void;
 
@@ -27,16 +35,16 @@ type Listener = () => void;
  * while scrolling.
  */
 export class SignalStore {
-  private values = new Map<SignalName, number | undefined>();
+  private values = new Map<SignalName, SignalValues[SignalName] | undefined>();
   private listeners = new Map<SignalName, Set<Listener>>();
 
   /** Reads a value without subscribing to it. */
-  peek(name: SignalName): number | undefined {
-    return this.values.get(name);
+  peek<N extends SignalName>(name: N): SignalValues[N] | undefined {
+    return this.values.get(name) as SignalValues[N] | undefined;
   }
 
   /** Writes a value and notifies its subscribers if it changed. */
-  set(name: SignalName, value: number | undefined) {
+  set<N extends SignalName>(name: N, value: SignalValues[N] | undefined) {
     if (this.values.get(name) === value) {
       return;
     }
@@ -61,10 +69,10 @@ export class SignalStore {
  *
  * Reads a value and re-renders the component whenever it changes.
  */
-export function useSignal(
+export function useSignal<N extends SignalName>(
   store: SignalStore,
-  name: SignalName
-): number | undefined {
+  name: N
+): SignalValues[N] | undefined {
   const subscribe = useCallback(
     (listener: Listener) => store.subscribe(name, listener),
     [store, name]

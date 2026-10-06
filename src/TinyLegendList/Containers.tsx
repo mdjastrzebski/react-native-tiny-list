@@ -10,13 +10,15 @@ export interface TinyLegendListRenderItemInfo<T> {
 
 /**
  * Legend List: `ContainersProps`, which passes a `getRenderedItem` callback
- * instead of `data` and `renderItem`.
+ * instead of `renderItem`.
+ *
+ * No `data`: each container reads its own item from a signal, so new data
+ * re-renders only the containers whose item changed.
  */
 interface ContainersProps<T> {
   store: SignalStore;
-  data: ReadonlyArray<T>;
   renderItem: (info: TinyLegendListRenderItemInfo<T>) => ReactNode;
-  onItemLayout: (index: number, size: number) => void;
+  onItemLayout: (itemKey: string, size: number) => void;
 }
 
 /**
@@ -43,30 +45,28 @@ export function Containers<T>(props: ContainersProps<T>) {
 /**
  * Legend List: `ContainerSlot`, `Container` and `PositionView` in one.
  *
- * A slot that shows one item at a time. It subscribes to its own item index
- * and position, so moving it re-renders this container alone.
+ * A slot that shows one item at a time. It subscribes to its own item and
+ * position, so moving it re-renders this container alone.
  */
 function Container<T>({
   id,
   store,
-  data,
   renderItem,
   onItemLayout,
 }: ContainersProps<T> & { id: number }) {
+  const itemKey = useSignal(store, `containerItemKey${id}`);
   const itemIndex = useSignal(store, `containerItemIndex${id}`);
+  const item = useSignal(store, `containerItemData${id}`) as T;
   const position = useSignal(store, `containerPosition${id}`);
 
   // A position change must not re-run `renderItem`.
-  const hasItem = itemIndex !== undefined && itemIndex < data.length;
   const content = useMemo(
     () =>
-      hasItem
-        ? renderItem({ item: data[itemIndex] as T, index: itemIndex })
-        : null,
-    [hasItem, data, itemIndex, renderItem]
+      itemIndex === undefined ? null : renderItem({ item, index: itemIndex }),
+    [item, itemIndex, renderItem]
   );
 
-  if (!hasItem) {
+  if (itemKey === undefined) {
     return null;
   }
 
@@ -74,10 +74,10 @@ function Container<T>({
     <View
       // Keyed by item: a container that moves to another item remounts the
       // item's views, so no state leaks from the previous item.
-      key={itemIndex}
+      key={itemKey}
       style={[styles.container, { top: position }]}
       onLayout={(event) =>
-        onItemLayout(itemIndex, event.nativeEvent.layout.height)
+        onItemLayout(itemKey, event.nativeEvent.layout.height)
       }
     >
       {content}

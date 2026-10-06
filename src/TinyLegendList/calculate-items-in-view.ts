@@ -1,85 +1,13 @@
 import {
   computeBufferedArea,
   containsArea,
-  DEFAULT_DRAW_DISTANCE,
   findItemsInArea,
   getCoveredArea,
-  type Area,
-  type IndexRange,
-  type ScrollDirection,
 } from './buffered-range';
 import { findAvailableContainers } from './find-available-containers';
-import {
-  createItemLayout,
-  DEFAULT_ESTIMATED_ITEM_SIZE,
-  setItemCount,
-  updateItemPositions,
-  type ItemLayout,
-} from './item-layout';
+import { updateItemPositions } from './item-layout';
+import type { ListState } from './list-state';
 import type { SignalStore } from './signals';
-
-/**
- * Legend List: `InternalState`.
- *
- * Everything the list knows, in one mutable object. Components never read it;
- * they read signals instead, so changing it re-renders nothing.
- */
-export interface ListState {
-  estimatedItemSize: number;
-  drawDistance: number;
-  layout: ItemLayout;
-  /** Scroll offset and viewport height. */
-  scroll: number;
-  scrollLength: number;
-  scrollDirection: ScrollDirection;
-  /**
-   * Legend List: `startBuffered` and `endBuffered`.
-   *
-   * Items to render, from the last pass.
-   */
-  range: IndexRange | null;
-  /**
-   * Legend List: `scrollForNextCalculateItemsInView`.
-   *
-   * Area covered by `range`; while the buffered area stays inside, skip.
-   */
-  coveredArea: Area | undefined;
-  /**
-   * Legend List: `containerItemKeys`, which maps item keys to containers.
-   *
-   * Item index shown by each container; `undefined` for an unused one.
-   */
-  containerItems: Array<number | undefined>;
-}
-
-/** Legend List: the initial `InternalState` built in `LegendListInner`. */
-export function createListState(): ListState {
-  return {
-    estimatedItemSize: DEFAULT_ESTIMATED_ITEM_SIZE,
-    drawDistance: DEFAULT_DRAW_DISTANCE,
-    layout: createItemLayout(),
-    scroll: 0,
-    scrollLength: 0,
-    scrollDirection: 0,
-    range: null,
-    coveredArea: undefined,
-    containerItems: [],
-  };
-}
-
-/**
- * Legend List: the `dataChanged` path of `calculateItemsInView`, which frees
- * the containers of removed items through `pendingRemoval`.
- *
- * Adapts the list to new data and frees containers of removed items.
- */
-export function setListItemCount(state: ListState, itemCount: number) {
-  setItemCount(state.layout, itemCount);
-  state.containerItems = state.containerItems.map((itemIndex) =>
-    itemIndex !== undefined && itemIndex < itemCount ? itemIndex : undefined
-  );
-  state.coveredArea = undefined;
-}
 
 /**
  * Legend List: `calculateItemsInView`.
@@ -137,26 +65,34 @@ export function calculateItemsInView(state: ListState, store: SignalStore) {
     const renderedItems = new Set(state.containerItems);
     const neededItems: number[] = [];
     for (let index = range.startIndex; index <= range.endIndex; index++) {
-      if (!renderedItems.has(index)) {
+      if (!renderedItems.has(layout.keys[index])) {
         neededItems.push(index);
       }
     }
 
     const containers = findAvailableContainers({
       containerItems: state.containerItems,
+      indexByKey: layout.indexByKey,
       neededItems,
       range,
     });
     containers.forEach((container, order) => {
-      state.containerItems[container] = neededItems[order];
+      state.containerItems[container] = layout.keys[neededItems[order]!];
     });
   }
 
-  // 5. Publish. `set` notifies only on change, so only containers that got a
-  // new item or moved re-render.
+  // 5. Publish. `set` notifies only on change, so only containers whose item,
+  // index or position changed re-render.
   store.set('numContainers', state.containerItems.length);
-  state.containerItems.forEach((itemIndex, container) => {
+  state.containerItems.forEach((itemKey, container) => {
+    const itemIndex =
+      itemKey === undefined ? undefined : layout.indexByKey.get(itemKey);
+    store.set(`containerItemKey${container}`, itemKey);
     store.set(`containerItemIndex${container}`, itemIndex);
+    store.set(
+      `containerItemData${container}`,
+      itemIndex === undefined ? undefined : state.data[itemIndex]
+    );
     store.set(
       `containerPosition${container}`,
       itemIndex === undefined ? undefined : layout.positions[itemIndex]
