@@ -1,14 +1,19 @@
 import { isInRange, type IndexRange } from './index-range';
 
-/** What a recycle key currently renders. */
+/**
+ * FlashList: the values of `RenderStackManager.keyMap`, which add a `stableId`.
+ *
+ * What a recycle key currently renders.
+ */
 export interface RenderStackEntry {
   index: number;
   itemType: string;
 }
 
 /**
- * Maps React keys ("recycle keys") to the items they render, like FlashList's
- * `RenderStackManager`.
+ * FlashList: `RenderStackManager`. Methods: `getEntries` is `getRenderStack`.
+ *
+ * Maps React keys ("recycle keys") to the items they render.
  *
  * This is the heart of recycling. When an item scrolls out and another one
  * scrolls in, the new item takes over the old item's key. React then sees the

@@ -1,7 +1,11 @@
 import type { ComponentRef } from 'react';
 import type { View } from 'react-native';
 
-/** A mounted native view, as returned by a `ref` on `<View>`. */
+/**
+ * FlashList: `CompatView`, used as `RefObject<CompatView>`.
+ *
+ * A mounted native view, as returned by a `ref` on `<View>`.
+ */
 export type HostView = ComponentRef<typeof View>;
 
 /**
@@ -23,12 +27,20 @@ function measureHeight(view: HostView): number {
 
 // Separate names so tests can mock viewport and item sizes independently.
 
-/** Height of the list's visible area. */
+/**
+ * FlashList: `measureParentSize`, which returns width and height.
+ *
+ * Height of the list's visible area.
+ */
 export function measureViewportSize(container: HostView): number {
   return measureHeight(container);
 }
 
-/** Height of one rendered cell. */
+/**
+ * FlashList: `measureItemLayout`, which returns the full layout.
+ *
+ * Height of one rendered cell.
+ */
 export function measureItemSize(cell: HostView): number {
   return measureHeight(cell);
 }

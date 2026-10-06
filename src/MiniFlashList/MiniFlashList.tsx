@@ -28,11 +28,13 @@ import {
   type MiniFlashListRenderItemInfo,
 } from './ViewHolder';
 
+/** FlashList: the fallback in `RecyclerViewManager.getItemType`. */
 const DEFAULT_ITEM_TYPE = 'default';
 
 /** Safety net against a measure → re-render loop that never settles. */
 const MAX_RENDERS_WITHOUT_COMMIT = 10;
 
+/** FlashList: `FlashListProps`. */
 export interface MiniFlashListProps<T> {
   data: ReadonlyArray<T>;
   /** Keep it stable (e.g. `useCallback`), or every cell re-renders on every list render. */
@@ -44,6 +46,8 @@ export interface MiniFlashListProps<T> {
 }
 
 /**
+ * FlashList: `FlashList`, which renders `RecyclerView`.
+ *
  * A minimal FlashList: a virtualized list that recycles its cells.
  *
  * 1. `LinearLayoutManager` keeps a position and size for every item.

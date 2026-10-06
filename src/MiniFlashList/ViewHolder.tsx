@@ -8,14 +8,20 @@ import {
 import { StyleSheet, View, type LayoutChangeEvent } from 'react-native';
 import type { HostView } from './measure-layout';
 
+/** FlashList: `ListRenderItemInfo`. */
 export interface MiniFlashListRenderItemInfo<T> {
   item: T;
   index: number;
 }
 
-/** Mounted cell views by item index, read by the list's measurement pass. */
+/**
+ * FlashList: the `refHolder` prop, which has no type name of its own.
+ *
+ * Mounted cell views by item index, read by the list's measurement pass.
+ */
 export type CellRefs = Map<number, RefObject<HostView | null>>;
 
+/** FlashList: `ViewHolderProps`, with `cellRefs` named `refHolder`. */
 interface ViewHolderProps<T> {
   index: number;
   item: T;
@@ -27,8 +33,10 @@ interface ViewHolderProps<T> {
 }
 
 /**
- * One cell of the list (FlashList's `ViewHolder`). The list gives it a
- * recycle key, so the same instance shows different items over time.
+ * FlashList: `ViewHolder`.
+ *
+ * One cell of the list. The list gives it a recycle key, so the same instance
+ * shows different items over time.
  */
 function ViewHolderInternal<T>({
   index,

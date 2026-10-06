@@ -12,10 +12,12 @@ function measureHeight(view: HostView): number {
   return element.getBoundingClientRect().height;
 }
 
+/** FlashList: `measureParentSize` in `measureLayout.web.ts`. */
 export function measureViewportSize(container: HostView): number {
   return measureHeight(container);
 }
 
+/** FlashList: `measureItemLayout` in `measureLayout.web.ts`. */
 export function measureItemSize(cell: HostView): number {
   return measureHeight(cell);
 }

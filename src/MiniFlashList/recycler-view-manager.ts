@@ -16,7 +16,12 @@ export interface RecyclerViewManagerProps<T> {
 }
 
 /**
- * All list state outside React (FlashList's `RecyclerViewManager`).
+ * FlashList: `RecyclerViewManager`. Methods: `updateViewportSize` is
+ * `updateLayoutParams`, `applyMeasurements` is `modifyChildrenLayout`,
+ * `getItemCount` is `getDataLength`, `recomputeEngagedRange` is
+ * `recomputeEngagedIndices`, `syncRenderStack` is `updateRenderStack`.
+ *
+ * All list state outside React.
  *
  * Event handlers and effects call the `update*` methods, which recompute the
  * engaged range and re-sync the render stack when needed. Each returns `true`

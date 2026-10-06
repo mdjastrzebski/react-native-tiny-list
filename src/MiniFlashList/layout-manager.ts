@@ -1,12 +1,24 @@
 import { EMPTY_RANGE, type IndexRange } from './index-range';
 
-/** Size used for every item until the first one has been measured. */
+/**
+ * FlashList: the initial value of `MultiTypeAverageWindow`, 200 there.
+ *
+ * Size used for every item until the first one has been measured.
+ */
 export const DEFAULT_ESTIMATED_ITEM_SIZE = 100;
 
-/** Size changes smaller than this are float jitter, not real changes. */
+/**
+ * FlashList: `areDimensionsEqual`, which rounds to the pixel ratio instead.
+ *
+ * Size changes smaller than this are float jitter, not real changes.
+ */
 const SIZE_TOLERANCE = 0.5;
 
-/** Position and size of one item along the scroll axis. */
+/**
+ * FlashList: `RVLayout`, which stores `x`, `y`, `width` and `height`.
+ *
+ * Position and size of one item along the scroll axis.
+ */
 export interface ItemLayout {
   /** Distance from the top of the list content. */
   offset: number;
@@ -15,18 +27,21 @@ export interface ItemLayout {
   isMeasured: boolean;
 }
 
+/** FlashList: `RVLayoutInfo`, which stores both dimensions. */
 export interface ItemMeasurement {
   index: number;
   size: number;
 }
 
 /**
- * Knows where every item goes, like FlashList's `RVLinearLayoutManagerImpl`.
+ * FlashList: `RVLinearLayoutManagerImpl`. Methods: `getItemCount` is
+ * `getLayoutCount`, `getContentSize` is `getLayoutSize`, `applyMeasurements`
+ * is `modifyLayout`, `findItemsInRange` is `getVisibleLayouts`.
  *
- * It keeps one layout per item. Unmeasured items get the average of all sizes
- * measured so far, so estimates improve as the user scrolls. Items are
- * stacked one after another, so their offsets only grow, which lets
- * `findItemsInRange` use binary search.
+ * Knows where every item goes: it keeps one layout per item. Unmeasured items
+ * get the average of all sizes measured so far, so estimates improve as the
+ * user scrolls. Items are stacked one after another, so their offsets only
+ * grow, which lets `findItemsInRange` use binary search.
  */
 export class LinearLayoutManager {
   private layouts: ItemLayout[] = [];
@@ -136,6 +151,8 @@ export class LinearLayoutManager {
 }
 
 /**
+ * FlashList: `findFirstVisibleIndex`, which searches the layouts directly.
+ *
  * Binary search: the first index in `[0, count)` for which `predicate` is
  * true, or `count` if there is none. `predicate` must be false for a prefix
  * of the indices and true for the rest.
