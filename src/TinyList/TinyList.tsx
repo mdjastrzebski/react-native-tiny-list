@@ -26,6 +26,9 @@ export interface TinyListProps<T> {
  * The simplest virtualized list: a vertical ScrollView that renders only the
  * items near the viewport and replaces the rest with two spacer views.
  *
+ * Main flow: measure the viewport, the items and the scroll offset, compute
+ * the render window from them, then render that window between the spacers.
+ *
  * Item sizes are measured with `onLayout` and cached by index. Expect blank
  * areas and jumps while scrolling fast or when estimates are off.
  */
@@ -60,13 +63,14 @@ export function TinyList<T>({ data, renderItem }: TinyListProps<T>) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useLayoutEffect(updateRenderWindow, [data]);
 
-  // Needed to establish viewport height
+  // The ScrollView's own height is the viewport size, which sets the window size
   const handleLayout = (event: LayoutChangeEvent) => {
     viewportSizeRef.current = event.nativeEvent.layout.height;
     updateRenderWindow();
   };
 
-  // Needed to get actual item size
+  // Replace the estimated size of a rendered item with its real height.
+  // Only a changed size can move the window, so skip unchanged ones.
   const handleItemLayout = (index: number, event: LayoutChangeEvent) => {
     const size = event.nativeEvent.layout.height;
     if (sizesRef.current[index] !== size) {
@@ -75,7 +79,7 @@ export function TinyList<T>({ data, renderItem }: TinyListProps<T>) {
     }
   };
 
-  // Needed to get the current scroll positon
+  // Track the scroll offset so the window follows the user as they scroll
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     scrollOffsetRef.current = event.nativeEvent.contentOffset.y;
     updateRenderWindow();
@@ -87,7 +91,7 @@ export function TinyList<T>({ data, renderItem }: TinyListProps<T>) {
   const items: ReactNode[] = [];
   for (let index = startIndex; index < endIndex; index++) {
     items.push(
-      // Wrapper view to handle sizing
+      // Wrap each item in a View so `onLayout` can measure its height
       <View key={index} onLayout={(event) => handleItemLayout(index, event)}>
         {renderItem({ item: data[index] as T, index })}
       </View>
@@ -97,11 +101,16 @@ export function TinyList<T>({ data, renderItem }: TinyListProps<T>) {
   return (
     <ScrollView
       onScroll={handleScroll}
+      // `onScroll` is throttled, so it can miss the final offset. React Native
+      // reports it in `onScrollEndDrag` (drag) and `onMomentumScrollEnd` (fling).
       onScrollEndDrag={handleScroll}
       onMomentumScrollEnd={handleScroll}
       onLayout={handleLayout}
+      // Deliver scroll events at most about once per frame (16 ms)
       scrollEventThrottle={16}
     >
+      {/* Spacers keep the content at full height, so the scroll bar and
+          scroll offset match a list with every item rendered */}
       <View style={{ height: sizerBefore }} />
       {items}
       <View style={{ height: sizerAfter }} />

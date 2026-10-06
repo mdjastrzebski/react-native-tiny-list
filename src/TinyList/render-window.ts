@@ -39,38 +39,42 @@ export function computeRenderWindow({
   scrollOffset,
   viewportSize,
 }: ComputeRenderWindowParams): RenderWindow {
-  // Render some items before and after the viewport to reduce flickering
+  // The window is the viewport grown by one buffer on each side. Rendering a
+  // bit beyond the viewport means items are ready before they scroll into view.
   const bufferSize = viewportSize;
   const windowStartOffset = scrollOffset - bufferSize;
   const windowEndOffset = scrollOffset + viewportSize + bufferSize;
 
+  // How many items fall above and below the window, and their total size
   let itemsBefore = 0;
   let itemsAfter = 0;
   let sizerBefore = 0;
   let sizerAfter = 0;
 
+  // Walk the items top to bottom, tracking where each one starts and ends
   let itemStartOffset = 0;
-
-  // Go though list and measure items before, inside and after viewport
   for (let itemIndex = 0; itemIndex < itemCount; itemIndex += 1) {
     const itemSize = sizes[itemIndex] ?? DEFAULT_ITEM_SIZE;
     const itemEndOffset = itemStartOffset + itemSize;
 
-    // Items Before window
+    // Ends above the window: the top sizer stands in for it
     if (itemEndOffset <= windowStartOffset) {
       itemsBefore += 1;
       sizerBefore += itemSize;
     }
-    // Items after the window
+    // Starts below the window: the bottom sizer stands in for it
     else if (itemStartOffset >= windowEndOffset) {
       itemsAfter += 1;
       sizerAfter += itemSize;
     }
+    // Otherwise it overlaps the window and will be rendered
 
-    // Next Item
+    // The next item starts where this one ends
     itemStartOffset = itemEndOffset;
   }
 
+  // Items above the window come first, so their count is the first rendered
+  // index; likewise, items below the window are the last ones.
   return {
     startIndex: itemsBefore,
     endIndex: itemCount - itemsAfter,

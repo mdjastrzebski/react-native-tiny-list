@@ -8,7 +8,12 @@ When making changes:
 
 - **Use good algorithms and structure, behind clear names.** Prefer binary search over a linear scan, cached offsets over recomputing them, and reasonable memoization over needless re-renders. Extract each technique into a small, well-named function (for example `findFirstItemAfterOffset`) so the calling code still reads as a description of the idea.
 - **Keep core logic in small, pure functions** (for example `computeRenderWindow` in `src/TinyList/render-window.ts`) that can be read and unit-tested apart from React.
-- **Comment generously, but briefly.** Explain what a block does, why it is needed and, for algorithms, how it works step by step (for example, one short comment per step of the render-window loop). Always explain surprising React Native behavior (for example, the final drag offset arriving only in `onScrollEndDrag`). Keep each comment to a line or two: long comments hurt readability as much as missing ones.
+- **Add concise comments that guide the reader through the main flow.** Someone reading only the comments should be able to follow what the code does, step by step. For each meaningful block, answer whichever of these isn't obvious from the code:
+  - **What?** What this block does, in plain words (for example, "Find the first item visible below the scroll offset").
+  - **Why?** Why it is needed or done this way (for example, why a spacer stands in for unrendered items).
+  - **How?** For algorithms, how it works, with one short comment per step (for example, each step of the render-window loop).
+
+  Always explain surprising React Native behavior (for example, the final drag offset arriving only in `onScrollEndDrag`). Keep each comment to a line or two and don't restate what the code already says clearly: long or redundant comments hurt readability as much as missing ones.
 - **Don't trade clarity for small wins.** Skip micro-optimizations and clever tricks that make the code harder to follow for little gain. Known flaws such as flicker or blank areas while scrolling fast are acceptable when fixing them would obscure the core idea; document them instead.
 - **Put large techniques in their own component.** Machinery such as cell recycling, velocity-based offset projection or scroll anchoring (see `refs/`) belongs in a separate, clearly named component, not bolted onto an existing simpler one.
 
