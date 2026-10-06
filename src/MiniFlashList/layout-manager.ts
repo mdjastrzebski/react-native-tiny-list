@@ -39,14 +39,15 @@ export interface ItemMeasurement {
  * is `modifyLayout`, `findItemsInRange` is `getVisibleLayouts`.
  *
  * Knows where every item goes: it keeps one layout per item. Unmeasured items
- * get the average of all sizes measured so far, so estimates improve as the
- * user scrolls. Items are stacked one after another, so their offsets only
- * grow, which lets `findItemsInRange` use binary search.
+ * get the average size of the measured ones, so estimates improve as the user
+ * scrolls. Items are stacked one after another, so their offsets only grow,
+ * which lets `findItemsInRange` use binary search.
  */
 export class LinearLayoutManager {
   private layouts: ItemLayout[] = [];
+  // Running sum and count over the currently measured items, for the average.
   private measuredSizeTotal = 0;
-  private measurementCount = 0;
+  private measuredItemCount = 0;
 
   getItemCount(): number {
     return this.layouts.length;
@@ -66,10 +67,10 @@ export class LinearLayoutManager {
     return last ? last.offset + last.size : 0;
   }
 
-  /** Average of every size measured so far. */
+  /** Average size of the currently measured items. */
   getEstimatedItemSize(): number {
-    return this.measurementCount > 0
-      ? this.measuredSizeTotal / this.measurementCount
+    return this.measuredItemCount > 0
+      ? this.measuredSizeTotal / this.measuredItemCount
       : DEFAULT_ESTIMATED_ITEM_SIZE;
   }
 
@@ -80,6 +81,10 @@ export class LinearLayoutManager {
       return false;
     }
 
+    // Removed items no longer count towards the average.
+    for (let index = itemCount; index < oldCount; index++) {
+      this.forgetMeasurement(this.getLayout(index));
+    }
     // Layouts are kept by index, so surviving items keep their old sizes.
     this.layouts.length = Math.min(oldCount, itemCount);
     for (let index = oldCount; index < itemCount; index++) {
@@ -102,10 +107,12 @@ export class LinearLayoutManager {
         continue;
       }
 
+      // Replace the item's old size in the average, so it counts only once.
+      this.forgetMeasurement(layout);
       layout.size = size;
       layout.isMeasured = true;
       this.measuredSizeTotal += size;
-      this.measurementCount += 1;
+      this.measuredItemCount += 1;
       hasChanged = true;
     }
 
@@ -129,6 +136,14 @@ export class LinearLayoutManager {
       (index) => this.getLayout(index).offset >= endOffset
     );
     return startIndex < endIndex ? { startIndex, endIndex } : EMPTY_RANGE;
+  }
+
+  /** Takes a measured item's size out of the running average. */
+  private forgetMeasurement(layout: ItemLayout) {
+    if (layout.isMeasured) {
+      this.measuredSizeTotal -= layout.size;
+      this.measuredItemCount -= 1;
+    }
   }
 
   /**

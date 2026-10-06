@@ -31,8 +31,12 @@ import {
 /** FlashList: the fallback in `RecyclerViewManager.getItemType`. */
 const DEFAULT_ITEM_TYPE = 'default';
 
-/** Safety net against a measure → re-render loop that never settles. */
-const MAX_RENDERS_WITHOUT_COMMIT = 10;
+/**
+ * FlashList: `RenderTimeTracker.maxRendersWithoutCommit`, which is 40.
+ *
+ * Safety net against a measure → re-render loop that never settles.
+ */
+const MAX_RENDERS_WITHOUT_PAINT = 10;
 
 /** FlashList: `FlashListProps`. */
 export interface MiniFlashListProps<T> {
@@ -73,7 +77,7 @@ export function MiniFlashList<T>({
   const scrollOffsetRef = useRef(0);
   const viewportSizeRef = useRef(0);
   const engagedRangeRef = useRef(EMPTY_RANGE);
-  const rendersWithoutCommitRef = useRef(0);
+  const rendersWithoutPaintRef = useRef(0);
 
   const getEngagedRange = () =>
     computeEngagedRange({
@@ -111,14 +115,14 @@ export function MiniFlashList<T>({
     // A state update in a layout effect re-renders before the frame is
     // painted, so the user never sees cells at their estimated positions.
     if (hasViewportChanged || hasLayoutChanged) {
-      if (rendersWithoutCommitRef.current < MAX_RENDERS_WITHOUT_COMMIT) {
-        rendersWithoutCommitRef.current += 1;
+      if (rendersWithoutPaintRef.current < MAX_RENDERS_WITHOUT_PAINT) {
+        rendersWithoutPaintRef.current += 1;
         forceRender();
         return;
       }
       console.warn('MiniFlashList: layout did not settle, painting anyway.');
     }
-    rendersWithoutCommitRef.current = 0;
+    rendersWithoutPaintRef.current = 0;
   });
 
   // Cells report size changes the list did not cause; re-render to re-measure.

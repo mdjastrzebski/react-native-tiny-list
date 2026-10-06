@@ -56,6 +56,28 @@ describe('LinearLayoutManager', () => {
     expect(layoutManager.getContentSize()).toBe(120);
   });
 
+  it('counts a re-measured item once in the average', () => {
+    const layoutManager = createLayoutManager(3);
+    layoutManager.applyMeasurements([
+      { index: 0, size: 20 },
+      { index: 1, size: 40 },
+    ]);
+    layoutManager.applyMeasurements([{ index: 1, size: 80 }]);
+
+    expect(layoutManager.getEstimatedItemSize()).toBe(50);
+  });
+
+  it('drops removed items from the average', () => {
+    const layoutManager = createLayoutManager(3);
+    layoutManager.applyMeasurements([
+      { index: 0, size: 20 },
+      { index: 1, size: 40 },
+    ]);
+    layoutManager.setItemCount(1);
+
+    expect(layoutManager.getEstimatedItemSize()).toBe(20);
+  });
+
   it('ignores measurements that did not change', () => {
     const layoutManager = createLayoutManager(2);
     layoutManager.applyMeasurements([{ index: 0, size: 50 }]);

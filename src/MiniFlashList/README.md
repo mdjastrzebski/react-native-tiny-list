@@ -57,8 +57,9 @@ starts (`offset`) and how tall it is (`size`). Rows are stacked one after
 another, so a row's offset is the sum of the sizes above it.
 
 What about rows that have never been on screen? Their height is a guess: the
-average height of all rows measured so far, or 100 px before the first
-measurement. The guesses get better as you scroll.
+average height of the rows measured so far, each counted once at its latest
+height, or 100 px before the first measurement. The guesses get better as you
+scroll.
 
 Every cell is placed with `position: 'absolute'` at its row's offset, inside
 one tall view whose height is the sum of all rows. That tall view is what
@@ -109,9 +110,9 @@ updated the views but **before** the frame is painted:
    too.
 
 The loop usually settles in two or three passes. A cap of 10 passes stops a
-layout that never settles. A cell's own `onLayout` also catches size changes
-the list didn't cause, such as a row that expands when tapped, and starts a
-new round of measuring.
+layout that never settles (FlashList allows 40). A cell's own `onLayout` also
+catches size changes the list didn't cause, such as a row that expands when
+tapped, and starts a new round of measuring.
 
 ### Where the state lives
 
@@ -156,7 +157,8 @@ Each line names the FlashList source it follows (paths under
   returns a new range only on change).
 - **Synchronous measurement in `useLayoutEffect`** and re-rendering before
   paint until the layout settles, with a cap (`RecyclerView.tsx` layout
-  effects, `utils/measureLayout.ts`, `RenderTimeTracker`).
+  effects, `utils/measureLayout.ts`, `RenderTimeTracker`). The cap is 10
+  passes here and 40 in FlashList.
 - **`onLayout` fallback** for size changes the list didn't cause
   (`validateItemSize`).
 - **Viewport resize handling** through the outer container's `onLayout`.
@@ -183,7 +185,7 @@ Each line names the FlashList source it follows (paths under
   FlashList recomputes only the rows near the change and finishes the rest
   later.
 - **Per-type size estimates.** FlashList averages the last 5 measurements per
-  item type. MiniFlashList averages every measurement across all types.
+  item type. MiniFlashList averages all measured rows across all types.
 - **Recycle pool limit** (`maxItemsInRecyclePool`).
 - **Nested list coordination.** A parent FlashList waits for child FlashLists
   to settle before it commits (`LayoutCommitObserver`, pending children).
