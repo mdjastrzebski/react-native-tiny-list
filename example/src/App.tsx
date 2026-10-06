@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { Button, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import {
+  MiniFlashList,
   TinyFlatList,
   TinyList,
-  type TinyFlatListRenderItemInfo,
+  type MiniFlashListRenderItemInfo,
 } from 'react-native-tiny-list';
 
 type Item = { id: number; title: string };
@@ -13,11 +14,14 @@ const DATA: Item[] = Array.from({ length: 10_000 }, (_, i) => ({
   title: `Item ${i}`,
 }));
 
+const LISTS = ['TinyList', 'TinyFlatList', 'MiniFlashList'] as const;
+type ListName = (typeof LISTS)[number];
+
 // Defined outside the component so it stays stable and TinyFlatList can skip
 // re-rendering unchanged items.
-function renderItem({ item, index }: TinyFlatListRenderItemInfo<Item>) {
+function renderItem({ item, index }: MiniFlashListRenderItemInfo<Item>) {
+  // Vary heights to exercise measurement.
   return (
-    // Vary heights to exercise measurement.
     <View style={[styles.item, { height: 40 + (index % 5) * 15 }]}>
       <Text>{item.title}</Text>
     </View>
@@ -25,18 +29,27 @@ function renderItem({ item, index }: TinyFlatListRenderItemInfo<Item>) {
 }
 
 export default function App() {
-  const [list, setList] = useState<'list' | 'flatList'>('flatList');
+  const [list, setList] = useState<ListName>('MiniFlashList');
 
   return (
     <View style={styles.container}>
-      <View style={styles.toolbar}>
-        <Button title="TinyList" onPress={() => setList('list')} />
-        <Button title="TinyFlatList" onPress={() => setList('flatList')} />
+      <View style={styles.tabs}>
+        {LISTS.map((name) => (
+          <Pressable
+            key={name}
+            onPress={() => setList(name)}
+            style={[styles.tab, list === name && styles.activeTab]}
+          >
+            <Text>{name}</Text>
+          </Pressable>
+        ))}
       </View>
-      {list === 'list' ? (
+      {list === 'TinyList' ? (
         <TinyList data={DATA} renderItem={renderItem} />
-      ) : (
+      ) : list === 'TinyFlatList' ? (
         <TinyFlatList data={DATA} renderItem={renderItem} />
+      ) : (
+        <MiniFlashList data={DATA} renderItem={renderItem} />
       )}
     </View>
   );
@@ -46,11 +59,19 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  toolbar: {
+  tabs: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
     paddingTop: 48,
-    paddingBottom: 8,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: '#ccc',
+  },
+  tab: {
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: 12,
+  },
+  activeTab: {
+    backgroundColor: '#e8e8e8',
   },
   item: {
     justifyContent: 'center',

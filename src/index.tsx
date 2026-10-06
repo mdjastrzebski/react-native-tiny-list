@@ -8,3 +8,8 @@ export {
   type TinyFlatListProps,
   type TinyFlatListRenderItemInfo,
 } from './TinyFlatList';
+export {
+  MiniFlashList,
+  type MiniFlashListProps,
+  type MiniFlashListRenderItemInfo,
+} from './MiniFlashList';
