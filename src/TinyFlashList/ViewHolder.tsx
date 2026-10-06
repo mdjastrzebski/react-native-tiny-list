@@ -9,7 +9,7 @@ import { StyleSheet, View, type LayoutChangeEvent } from 'react-native';
 import type { HostView } from './measure-layout';
 
 /** FlashList: `ListRenderItemInfo`. */
-export interface MiniFlashListRenderItemInfo<T> {
+export interface TinyFlashListRenderItemInfo<T> {
   item: T;
   index: number;
 }
@@ -27,7 +27,7 @@ interface ViewHolderProps<T> {
   item: T;
   /** Top of the cell inside the list content. */
   offset: number;
-  renderItem: (info: MiniFlashListRenderItemInfo<T>) => ReactNode;
+  renderItem: (info: TinyFlashListRenderItemInfo<T>) => ReactNode;
   cellRefs: CellRefs;
   onSizeChanged: (index: number, size: number) => void;
 }

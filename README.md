@@ -62,7 +62,7 @@ import { TinyFlatList } from 'react-native-tiny-list';
 - **Memoized items.** Each item re-renders only when its props or `extraData`
   change.
 
-  ### `TinyFlashList`
+### `TinyFlashList`
 
 ```tsx
 import { TinyFlashList } from 'react-native-tiny-list';
@@ -80,7 +80,7 @@ mechanisms:
 - cell recycling through a render stack of reusable React keys
 - synchronous measurement before paint (new architecture only).
 
-See [`src/TinyFlashList/README.md`](src/MiniFlashList/README.md) for a guided tour
+See [`src/TinyFlashList/README.md`](src/TinyFlashList/README.md) for a guided tour
 and what was left out.
 
 ### `TinyLegendList`
@@ -96,7 +96,7 @@ mechanisms:
 - a pool of absolutely positioned containers
 - items assigned to the containers farthest from the viewport
 - estimated positions corrected as items are measured
-- per-container signals so the list never re-renders whilescrolling.
+- per-container signals so the list never re-renders while scrolling.
 
 See [`src/TinyLegendList/README.md`](src/TinyLegendList/README.md)
 for a guided tour and what was left out.

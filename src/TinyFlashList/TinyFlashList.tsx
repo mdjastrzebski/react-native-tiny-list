@@ -25,7 +25,7 @@ import { RenderStack } from './render-stack';
 import {
   ViewHolder,
   type CellRefs,
-  type MiniFlashListRenderItemInfo,
+  type TinyFlashListRenderItemInfo,
 } from './ViewHolder';
 
 /** FlashList: the fallback in `RecyclerViewManager.getItemType`. */
@@ -39,10 +39,10 @@ const DEFAULT_ITEM_TYPE = 'default';
 const MAX_RENDERS_WITHOUT_PAINT = 10;
 
 /** FlashList: `FlashListProps`. */
-export interface MiniFlashListProps<T> {
+export interface TinyFlashListProps<T> {
   data: ReadonlyArray<T>;
   /** Keep it stable (e.g. `useCallback`), or every cell re-renders on every list render. */
-  renderItem: (info: MiniFlashListRenderItemInfo<T>) => ReactNode;
+  renderItem: (info: TinyFlashListRenderItemInfo<T>) => ReactNode;
   /** Unique key per item. Lets an item keep its cell when its index changes. */
   keyExtractor?: (item: T, index: number) => string;
   /** Cells are only recycled between items of the same type. */
@@ -62,13 +62,13 @@ export interface MiniFlashListProps<T> {
  * 4. A layout effect measures the cells before paint and re-renders if
  *    anything moved.
  */
-export function MiniFlashList<T>({
+export function TinyFlashList<T>({
   data,
   renderItem,
   keyExtractor,
   getItemType,
   drawDistance = DEFAULT_DRAW_DISTANCE,
-}: MiniFlashListProps<T>) {
+}: TinyFlashListProps<T>) {
   // List state lives in plain mutable objects, like FlashList's
   // `RecyclerViewManager`. React state is only a "render again" trigger.
   const [layoutManager] = useState(() => new LinearLayoutManager());
@@ -128,7 +128,7 @@ export function MiniFlashList<T>({
         forceRender();
         return;
       }
-      console.warn('MiniFlashList: layout did not settle, painting anyway.');
+      console.warn('TinyFlashList: layout did not settle, painting anyway.');
     }
     rendersWithoutPaintRef.current = 0;
   });
