@@ -4,6 +4,10 @@ Contributions are always welcome, no matter how large or small!
 
 We want this community to be friendly and respectful to each other. Please follow it in all your interactions with the project. Before contributing, please read the [code of conduct](./CODE_OF_CONDUCT.md).
 
+## Project goals
+
+This project is meant for educational use. It shows the core ideas behind virtualized lists in code that is easy to read and reason about. Good algorithms (such as binary search), sensible memoization and sound structure are welcome, as long as each technique sits behind a clearly named function so the code stays easy to follow. Use comments freely to explain what each step does, why and how, but keep each one short. Avoid optimizations that make the code hard to read for little gain, and document known limitations rather than adding complexity to hide them. Large techniques such as cell recycling belong in separate, clearly named components.
+
 ## Development workflow
 
 This project is a monorepo managed using [Yarn workspaces](https://yarnpkg.com/features/workspaces). It contains the following packages:
@@ -48,7 +52,7 @@ yarn example ios
 To confirm that the app is running with the new architecture, you can check the Metro logs for a message like this:
 
 ```sh
-Running "SimpleListExample" with {"fabric":true,"initialProps":{"concurrentRoot":true},"rootTag":1}
+Running "TinyListExample" with {"fabric":true,"initialProps":{"concurrentRoot":true},"rootTag":1}
 ```
 
 Note the `"fabric":true` and `"concurrentRoot":true` properties.
