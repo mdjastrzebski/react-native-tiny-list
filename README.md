@@ -1,4 +1,4 @@
-# react-native-tiny-list
+# React Native Tiny List
 
 Tiny, readable virtualized lists for React Native
 
@@ -12,6 +12,7 @@ npm install react-native-tiny-list
 
 ## Usage
 
+### `TinyList`
 
 ```tsx
 import { TinyList } from 'react-native-tiny-list';
@@ -27,6 +28,8 @@ import { TinyList } from 'react-native-tiny-list';
 area and replaces the rest with spacer views. Item heights are measured with
 `onLayout` and cached by index; unmeasured items are assumed to be 50 px tall.
 Expect blank areas and content jumps while scrolling fast.
+
+### `TinyFlatList`
 
 ```tsx
 import { TinyFlatList } from 'react-native-tiny-list';
@@ -59,22 +62,28 @@ import { TinyFlatList } from 'react-native-tiny-list';
 - **Memoized items.** Each item re-renders only when its props or `extraData`
   change.
 
-```tsx
-import { MiniFlashList } from 'react-native-tiny-list';
+  ### `TinyFlashList`
 
-<MiniFlashList
+```tsx
+import { TinyFlashList } from 'react-native-tiny-list';
+
+<TinyFlashList
   data={items}
   renderItem={renderRow}
   getItemType={(item) => (item.isHeader ? 'header' : 'row')}
 />
 ```
 
-`MiniFlashList` is a minimal version of FlashList v2 that shows its core
-mechanisms: a layout manager that positions every cell absolutely, cell
-recycling through a render stack of reusable React keys, and synchronous
-measurement before paint (new architecture only). See
-[`src/MiniFlashList/README.md`](src/MiniFlashList/README.md) for a guided tour
+`TinyFlashList` is a minimal version of FlashList v2 that shows its core
+mechanisms:
+- a layout manager that positions every cell absolutely
+- cell recycling through a render stack of reusable React keys
+- synchronous measurement before paint (new architecture only).
+
+See [`src/TinyFlashList/README.md`](src/MiniFlashList/README.md) for a guided tour
 and what was left out.
+
+### `TinyLegendList`
 
 ```tsx
 import { TinyLegendList } from 'react-native-tiny-list';
@@ -83,10 +92,13 @@ import { TinyLegendList } from 'react-native-tiny-list';
 ```
 
 `TinyLegendList` is a minimal version of Legend List that shows its core
-mechanisms: a pool of absolutely positioned containers, items assigned to the
-containers farthest from the viewport, estimated positions corrected as items
-are measured, and per-container signals so the list never re-renders while
-scrolling. See [`src/TinyLegendList/README.md`](src/TinyLegendList/README.md)
+mechanisms:
+- a pool of absolutely positioned containers
+- items assigned to the containers farthest from the viewport
+- estimated positions corrected as items are measured
+- per-container signals so the list never re-renders whilescrolling.
+
+See [`src/TinyLegendList/README.md`](src/TinyLegendList/README.md)
 for a guided tour and what was left out.
 
 
