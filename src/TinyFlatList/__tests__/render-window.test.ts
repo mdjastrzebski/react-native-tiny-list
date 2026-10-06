@@ -86,6 +86,13 @@ describe('growTowardTarget', () => {
     ).toEqual({ start: 0, end: 20 });
   });
 
+  it('drops rendered items that do not touch the visible ones', () => {
+    // Keeping 0..5 would also render the gap 5..8, which is not in the budget.
+    expect(
+      growTowardTarget({ start: 8, end: 12 }, target, { start: 0, end: 5 }, 0)
+    ).toEqual({ start: 8, end: 12 });
+  });
+
   it('counts new visible items against the budget', () => {
     // The 4 visible items are new, so only 1 more fits in a budget of 5.
     expect(

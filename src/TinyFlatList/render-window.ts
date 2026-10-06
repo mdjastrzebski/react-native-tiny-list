@@ -58,9 +58,9 @@ export function computeRenderWindow({
 }
 
 /**
- * Grows `visible` one item at a time on each side until it covers `target`
- * or `maxNewItems` new items have been added. Items already in `previous` are
- * free: keeping them mounted costs no rendering.
+ * Grows `visible` toward `target`, adding at most `maxNewItems` items that are
+ * not in `previous`. Items already in `previous` are free: keeping them
+ * mounted costs no rendering.
  */
 export function growTowardTarget(
   visible: ItemRange,
@@ -68,34 +68,25 @@ export function growTowardTarget(
   previous: ItemRange,
   maxNewItems: number
 ): ItemRange {
-  const isRendered = (index: number) =>
-    index >= previous.start && index < previous.end;
+  // 1. Keep the rendered items that are still in the target, if they touch
+  //    the visible ones. Every item outside this range is new.
+  const kept = intersectRanges(previous, target);
+  let { start, end } = rangesTouch(kept, visible)
+    ? joinRanges(kept, visible)
+    : visible;
 
-  let { start, end } = visible;
-  let newItems = countNewItems(visible, previous);
+  // 2. New visible items use up the budget first.
+  let budget = maxNewItems - countNewItems(visible, previous);
 
-  let grew = true;
-  while (grew) {
-    grew = false;
-
-    // Add the item before the window, if it is free or within budget.
+  // 3. Spend the rest on new items, one on each side in turn.
+  while (budget > 0 && (start > target.start || end < target.end)) {
     if (start > target.start) {
-      const isNew = !isRendered(start - 1);
-      if (!isNew || newItems < maxNewItems) {
-        start -= 1;
-        newItems += isNew ? 1 : 0;
-        grew = true;
-      }
+      start -= 1;
+      budget -= 1;
     }
-
-    // Same for the item after the window.
-    if (end < target.end) {
-      const isNew = !isRendered(end);
-      if (!isNew || newItems < maxNewItems) {
-        end += 1;
-        newItems += isNew ? 1 : 0;
-        grew = true;
-      }
+    if (budget > 0 && end < target.end) {
+      end += 1;
+      budget -= 1;
     }
   }
 
@@ -138,6 +129,21 @@ function countNewItems(range: ItemRange, previous: ItemRange): number {
     Math.min(range.end, previous.end) - Math.max(range.start, previous.start)
   );
   return range.end - range.start - overlap;
+}
+
+function intersectRanges(a: ItemRange, b: ItemRange): ItemRange {
+  const start = Math.max(a.start, b.start);
+  return { start, end: Math.max(start, Math.min(a.end, b.end)) };
+}
+
+/** True when `a` is not empty and overlaps or sits right next to `b`. */
+function rangesTouch(a: ItemRange, b: ItemRange): boolean {
+  return a.start < a.end && a.start <= b.end && a.end >= b.start;
+}
+
+/** The smallest range covering both `a` and `b`. */
+function joinRanges(a: ItemRange, b: ItemRange): ItemRange {
+  return { start: Math.min(a.start, b.start), end: Math.max(a.end, b.end) };
 }
 
 export function isRangeInside(inner: ItemRange, outer: ItemRange): boolean {
