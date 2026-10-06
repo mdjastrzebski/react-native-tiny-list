@@ -13,7 +13,7 @@ const root = path.resolve(__dirname, '..');
 const config = withMetroConfig(getDefaultConfig(__dirname), {
   root,
   dirname: __dirname,
-  conditions: ['react-native-simple-list-source'],
+  conditions: ['react-native-tiny-list-source'],
 });
 
 // Keep reference repos (git submodules in `refs/`) out of Metro's file map

@@ -1,9 +1,9 @@
-# NaiveList
+# TinyList
 
-`NaiveList` is the simplest virtualized list we could write that still works. It exists to show the core idea behind React Native's `FlatList` with as little machinery as possible.
+`TinyList` is the simplest virtualized list we could write that still works. It exists to show the core idea behind React Native's `FlatList` with as little machinery as possible.
 
 ```tsx
-<NaiveList
+<TinyList
   data={items}
   renderItem={({ item, index }) => <Row item={item} />}
 />
@@ -65,13 +65,13 @@ These are expected, and left in on purpose to keep the code readable:
 - `data` and `renderItem({ item, index })`.
 - Windowing: only items near the viewport are mounted, with spacer views standing in for the rest.
 - Measuring each item's height with `onLayout`.
-- A buffer around the viewport. `NaiveList` uses one viewport above and one below. `FlatList`'s `windowSize` defaults to 21 viewports: 10 above, 10 below.
+- A buffer around the viewport. `TinyList` uses one viewport above and one below. `FlatList`'s `windowSize` defaults to 21 viewports: 10 above, 10 below.
 
 ### Not implemented
 
 **Data and rendering**
 - `keyExtractor`. Items are keyed by index.
-- `extraData`. Not needed, because `NaiveList` doesn't memoize items.
+- `extraData`. Not needed, because `TinyList` doesn't memoize items.
 - `ListHeaderComponent`, `ListFooterComponent`, `ListEmptyComponent`.
 - `ItemSeparatorComponent`.
 - `numColumns`, `columnWrapperStyle` (grids).
@@ -79,7 +79,7 @@ These are expected, and left in on purpose to keep the code readable:
 
 **Sizing and windowing**
 - `getItemLayout` (known item sizes, which skip measuring).
-- `initialNumToRender`, `windowSize`, `maxToRenderPerBatch`, `updateCellsBatchingPeriod`. `FlatList` adds cells in batches and spreads that work over time. `NaiveList` renders the whole window on every update.
+- `initialNumToRender`, `windowSize`, `maxToRenderPerBatch`, `updateCellsBatchingPeriod`. `FlatList` adds cells in batches and spreads that work over time. `TinyList` renders the whole window on every update.
 - `removeClippedSubviews`.
 
 **Scrolling**

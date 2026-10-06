@@ -1,14 +1,14 @@
 {
   "expo": {
-    "name": "SimpleList Example",
-    "slug": "react-native-simple-list-example",
+    "name": "TinyList Example",
+    "slug": "react-native-tiny-list-example",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "simplelist.example"
+      "bundleIdentifier": "tinylist.example"
     },
     "android": {
       "adaptiveIcon": {
@@ -17,7 +17,7 @@
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
-      "package": "simplelist.example"
+      "package": "tinylist.example"
     },
     "web": {
       "favicon": "./assets/favicon.png"

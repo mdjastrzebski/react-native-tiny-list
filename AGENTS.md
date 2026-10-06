@@ -7,7 +7,7 @@ This repo exists to teach how virtualized lists work. Code here should make the 
 When making changes:
 
 - **Use good algorithms and structure, behind clear names.** Prefer binary search over a linear scan, cached offsets over recomputing them, and reasonable memoization over needless re-renders. Extract each technique into a small, well-named function (for example `findFirstItemAfterOffset`) so the calling code still reads as a description of the idea.
-- **Keep core logic in small, pure functions** (for example `computeRenderWindow` in `src/NaiveList/render-window.ts`) that can be read and unit-tested apart from React.
+- **Keep core logic in small, pure functions** (for example `computeRenderWindow` in `src/TinyList/render-window.ts`) that can be read and unit-tested apart from React.
 - **Comment generously, but briefly.** Explain what a block does, why it is needed and, for algorithms, how it works step by step (for example, one short comment per step of the render-window loop). Always explain surprising React Native behavior (for example, the final drag offset arriving only in `onScrollEndDrag`). Keep each comment to a line or two: long comments hurt readability as much as missing ones.
 - **Don't trade clarity for small wins.** Skip micro-optimizations and clever tricks that make the code harder to follow for little gain. Known flaws such as flicker or blank areas while scrolling fast are acceptable when fixing them would obscure the core idea; document them instead.
 - **Put large techniques in their own component.** Machinery such as cell recycling, velocity-based offset projection or scroll anchoring (see `refs/`) belongs in a separate, clearly named component, not bolted onto an existing simpler one.

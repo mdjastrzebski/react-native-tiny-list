@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View } from 'react-native';
-import { NaiveList } from 'react-native-simple-list';
+import { TinyList } from 'react-native-tiny-list';
 
 type Item = { id: number; title: string };
 
@@ -11,7 +11,7 @@ const DATA: Item[] = Array.from({ length: 10_000 }, (_, i) => ({
 export default function App() {
   return (
     <View style={styles.container}>
-      <NaiveList
+      <TinyList
         data={DATA}
         renderItem={({ item, index }) => (
           // Vary heights to exercise measurement.

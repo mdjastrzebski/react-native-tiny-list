@@ -1,4 +1,4 @@
-# react-native-simple-list
+# react-native-tiny-list
 
 Simple flat list component
 
@@ -6,7 +6,7 @@ Simple flat list component
 
 
 ```sh
-npm install react-native-simple-list
+npm install react-native-tiny-list
 ```
 
 
@@ -14,15 +14,15 @@ npm install react-native-simple-list
 
 
 ```tsx
-import { NaiveList } from 'react-native-simple-list';
+import { TinyList } from 'react-native-tiny-list';
 
-<NaiveList
+<TinyList
   data={items}
   renderItem={({ item, index }) => <Row item={item} />}
 />
 ```
 
-`NaiveList` is the simplest possible virtualized list. It is a vertical
+`TinyList` is the simplest possible virtualized list. It is a vertical
 `ScrollView` that renders only the items within one viewport of the visible
 area and replaces the rest with spacer views. Item heights are measured with
 `onLayout` and cached by index; unmeasured items are assumed to be 50 px tall.

@@ -2,12 +2,12 @@
   "compilerOptions": {
     "rootDir": ".",
     "paths": {
-      "react-native-simple-list": ["./src/index"]
+      "react-native-tiny-list": ["./src/index"]
     },
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,
     "customConditions": [
-      "react-native-simple-list-source",
+      "react-native-tiny-list-source",
       "react-native-strict-api"
     ],
     "esModuleInterop": true,

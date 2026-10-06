@@ -6,7 +6,7 @@ import {
   userEvent,
 } from '@testing-library/react-native';
 import { Text } from 'react-native';
-import { NaiveList } from '../NaiveList';
+import { TinyList } from '../TinyList';
 
 type Item = { title: string };
 
@@ -20,7 +20,7 @@ function layoutEvent(height: number) {
 
 async function renderList(data: ReadonlyArray<Item> = DATA) {
   const result = await render(
-    <NaiveList
+    <TinyList
       data={data}
       renderItem={({ item, index }) => (
         <Text>
@@ -35,7 +35,7 @@ async function renderList(data: ReadonlyArray<Item> = DATA) {
   return scrollView;
 }
 
-describe('NaiveList', () => {
+describe('TinyList', () => {
   it('passes item and index to renderItem', async () => {
     await renderList();
     expect(screen.getByText('Item 0 #0')).toBeOnTheScreen();

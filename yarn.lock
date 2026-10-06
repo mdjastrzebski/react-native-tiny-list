@@ -10154,9 +10154,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-simple-list-example@workspace:example":
+"react-native-tiny-list-example@workspace:example":
   version: 0.0.0-use.local
-  resolution: "react-native-simple-list-example@workspace:example"
+  resolution: "react-native-tiny-list-example@workspace:example"
   dependencies:
     "@expo/metro-runtime": "npm:~57.0.16"
     expo: "npm:~57.0.26"
@@ -10170,9 +10170,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"react-native-simple-list@workspace:.":
+"react-native-tiny-list@workspace:.":
   version: 0.0.0-use.local
-  resolution: "react-native-simple-list@workspace:."
+  resolution: "react-native-tiny-list@workspace:."
   dependencies:
     "@eslint/compat": "npm:^2.1.0"
     "@eslint/eslintrc": "npm:^3.3.6"

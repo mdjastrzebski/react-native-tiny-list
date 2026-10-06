@@ -1,12 +1,12 @@
 {
-  "name": "react-native-simple-list",
+  "name": "react-native-tiny-list",
   "version": "0.1.0",
   "description": "Simple flat list component",
   "main": "./lib/module/index.js",
   "types": "./lib/typescript/src/index.d.ts",
   "exports": {
     ".": {
-      "react-native-simple-list-source": "./src/index.tsx",
+      "react-native-tiny-list-source": "./src/index.tsx",
       "types": "./lib/typescript/src/index.d.ts",
       "default": "./lib/module/index.js"
     },
@@ -32,7 +32,7 @@
     "!**/.*"
   ],
   "scripts": {
-    "example": "yarn workspace react-native-simple-list-example",
+    "example": "yarn workspace react-native-tiny-list-example",
     "clean": "del-cli lib",
     "prepare": "bob build",
     "typecheck": "tsc",

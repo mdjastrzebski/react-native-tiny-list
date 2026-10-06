@@ -8,14 +8,14 @@ import {
 } from 'react-native';
 import { computeRenderWindow } from './render-window';
 
-export interface NaiveListRenderItemInfo<T> {
+export interface TinyListRenderItemInfo<T> {
   item: T;
   index: number;
 }
 
-export interface NaiveListProps<T> {
+export interface TinyListProps<T> {
   data: ReadonlyArray<T>;
-  renderItem: (info: NaiveListRenderItemInfo<T>) => ReactNode;
+  renderItem: (info: TinyListRenderItemInfo<T>) => ReactNode;
 }
 
 /**
@@ -25,7 +25,7 @@ export interface NaiveListProps<T> {
  * Item sizes are measured with `onLayout` and cached by index. Expect blank
  * areas and jumps while scrolling fast or when estimates are off.
  */
-export function NaiveList<T>({ data, renderItem }: NaiveListProps<T>) {
+export function TinyList<T>({ data, renderItem }: TinyListProps<T>) {
   const [scrollOffset, setScrollOffset] = useState(0);
   const [viewportSize, setViewportSize] = useState(0);
 
@@ -56,11 +56,10 @@ export function NaiveList<T>({ data, renderItem }: NaiveListProps<T>) {
     }
   };
 
-    // Needed to get the current scroll positon
+  // Needed to get the current scroll positon
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     setScrollOffset(event.nativeEvent.contentOffset.y);
   };
-
 
   // Items we will actually render
   const items: ReactNode[] = [];
