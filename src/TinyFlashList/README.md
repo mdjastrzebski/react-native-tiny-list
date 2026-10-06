@@ -1,14 +1,14 @@
-# MiniFlashList
+# TinyFlashList
 
-`MiniFlashList` is a small, readable version of
+`TinyFlashList` is a small, readable version of
 [FlashList v2](https://github.com/Shopify/flash-list) (`@shopify/flash-list`).
 It keeps the ideas that make FlashList fast and leaves out everything else, so
 you can read the whole engine in a few short files.
 
 ```tsx
-import { MiniFlashList } from 'react-native-tiny-list';
+import { TinyFlashList } from 'react-native-tiny-list';
 
-<MiniFlashList
+<TinyFlashList
   data={items}
   renderItem={renderRow} // keep it stable, e.g. defined outside the component
   keyExtractor={(item) => item.id}
@@ -41,7 +41,7 @@ on, they repaint the same few boards.
                                        cell A ─ row 4   ← same cell, new row
 ```
 
-In React terms, a "cell" is a React key. MiniFlashList gives its cells keys
+In React terms, a "cell" is a React key. TinyFlashList gives its cells keys
 like `"0"`, `"1"`, `"2"` that have nothing to do with the rows. When a key
 moves to a new row, React sees the same component with new props. It updates
 the existing views (new text, new position) instead of unmounting and
@@ -99,7 +99,7 @@ Why "same type"? A header and a row are different trees of views. Turning a
 header cell into a row means rebuilding it, so nothing is saved. `getItemType`
 tells the list which rows can share cells.
 
-### Step 4: measure and fix before anyone sees ([`MiniFlashList.tsx`](MiniFlashList.tsx), [`measure-layout.ts`](measure-layout.ts))
+### Step 4: measure and fix before anyone sees ([`TinyFlashList.tsx`](TinyFlashList.tsx), [`measure-layout.ts`](measure-layout.ts))
 
 New rows are first placed using guessed heights. The real heights are only
 known after React has created the views. If those wrong positions reached the
@@ -129,7 +129,7 @@ React. FlashList is built the same way.
 
 ## Compared to TinyList
 
-| TinyList                                                             | MiniFlashList                                    |
+| TinyList                                                             | TinyFlashList                                    |
 | -------------------------------------------------------------------- | ------------------------------------------------ |
 | Spacer views above and below the rendered rows                       | Absolutely positioned cells inside one tall view |
 | Rows keyed by index: scrolling destroys old rows and builds new ones | Cells are recycled                               |
@@ -194,7 +194,7 @@ Each line names the FlashList source it follows (paths under
   FlashList recomputes only the rows near the change and finishes the rest
   later.
 - **Per-type size estimates.** FlashList averages the last 5 measurements per
-  item type. MiniFlashList averages all measured rows across all types.
+  item type. TinyFlashList averages all measured rows across all types.
 - **Recycle pool limit** (`maxItemsInRecyclePool`).
 - **Nested list coordination.** A parent FlashList waits for child FlashLists
   to settle before it commits (`LayoutCommitObserver`, pending children).

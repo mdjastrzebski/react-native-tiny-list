@@ -2,7 +2,7 @@ import { describe, expect, it, jest } from '@jest/globals';
 import { render, screen, userEvent } from '@testing-library/react-native';
 import { useState } from 'react';
 import { Text } from 'react-native';
-import { MiniFlashList } from '../MiniFlashList';
+import { TinyFlashList } from '../TinyFlashList';
 import type { HostView } from '../measure-layout';
 
 // The test renderer has no layout engine, so fake synchronous measurement:
@@ -49,10 +49,10 @@ const renderStatefulItem = ({ item }: { item: Item }) => (
   <StatefulRow item={item} />
 );
 
-describe('MiniFlashList', () => {
+describe('TinyFlashList', () => {
   it('renders the items near the viewport', async () => {
     await render(
-      <MiniFlashList data={createData(100)} renderItem={renderItem} />
+      <TinyFlashList data={createData(100)} renderItem={renderItem} />
     );
 
     // Window is [-250, 750) px: items 0..14.
@@ -64,7 +64,7 @@ describe('MiniFlashList', () => {
   it('positions cells absolutely using measured sizes', async () => {
     const data = createData(100);
     data[0] = { title: 'Item 0', height: 300 };
-    await render(<MiniFlashList data={data} renderItem={renderItem} />);
+    await render(<TinyFlashList data={data} renderItem={renderItem} />);
 
     expect(screen.getByText('Item 1').parent).toHaveStyle({
       position: 'absolute',
@@ -76,7 +76,7 @@ describe('MiniFlashList', () => {
   it('renders new items when scrolled', async () => {
     const user = userEvent.setup();
     await render(
-      <MiniFlashList data={createData(100)} renderItem={renderItem} />
+      <TinyFlashList data={createData(100)} renderItem={renderItem} />
     );
 
     await user.scrollTo(getScrollView(), {
@@ -93,7 +93,7 @@ describe('MiniFlashList', () => {
     const user = userEvent.setup();
     mountCount = 0;
     await render(
-      <MiniFlashList data={createData(100)} renderItem={renderItem} />
+      <TinyFlashList data={createData(100)} renderItem={renderItem} />
     );
     expect(mountCount).toBe(15);
 
@@ -111,24 +111,24 @@ describe('MiniFlashList', () => {
       renderItem: renderStatefulItem,
       keyExtractor: (item: Item) => item.title,
     };
-    await render(<MiniFlashList data={data} {...props} />);
+    await render(<TinyFlashList data={data} {...props} />);
 
     // Insert an item at the top: "Item 0" moves to index 1 but keeps its cell.
     const newItem = { title: 'New', height: 50 };
     await screen.rerender(
-      <MiniFlashList data={[newItem, ...data]} {...props} />
+      <TinyFlashList data={[newItem, ...data]} {...props} />
     );
     expect(screen.getByText('Item 0, mounted for Item 0')).toBeOnTheScreen();
   });
 
   it('keeps cell state with the index without keyExtractor', async () => {
     const data = createData(100);
-    await render(<MiniFlashList data={data} renderItem={renderStatefulItem} />);
+    await render(<TinyFlashList data={data} renderItem={renderStatefulItem} />);
 
     // Without stable ids, the cell at index 1 now shows "Item 0".
     const newItem = { title: 'New', height: 50 };
     await screen.rerender(
-      <MiniFlashList
+      <TinyFlashList
         data={[newItem, ...data]}
         renderItem={renderStatefulItem}
       />
@@ -137,7 +137,7 @@ describe('MiniFlashList', () => {
   });
 
   it('renders nothing for empty data', async () => {
-    await render(<MiniFlashList data={[]} renderItem={renderItem} />);
+    await render(<TinyFlashList data={[]} renderItem={renderItem} />);
     expect(screen.queryByText(/Item/)).not.toBeOnTheScreen();
   });
 });

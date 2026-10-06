@@ -9,10 +9,10 @@ export {
   type TinyFlatListRenderItemInfo,
 } from './TinyFlatList';
 export {
-  MiniFlashList,
-  type MiniFlashListProps,
-  type MiniFlashListRenderItemInfo,
-} from './MiniFlashList';
+  TinyFlashList,
+  type TinyFlashListProps,
+  type TinyFlashListRenderItemInfo,
+} from './TinyFlashList';
 export {
   TinyLegendList,
   type TinyLegendListProps,

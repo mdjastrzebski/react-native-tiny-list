@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import {
-  MiniFlashList,
+  TinyFlashList,
   TinyFlatList,
   TinyLegendList,
   TinyList,
-  type MiniFlashListRenderItemInfo,
+  type TinyFlashListRenderItemInfo,
 } from 'react-native-tiny-list';
 
 type Item = { id: number; title: string };
@@ -18,14 +18,14 @@ const DATA: Item[] = Array.from({ length: 10_000 }, (_, i) => ({
 const LISTS = [
   'TinyList',
   'TinyFlatList',
-  'MiniFlashList',
+  'TinyFlashList',
   'TinyLegendList',
 ] as const;
 type ListName = (typeof LISTS)[number];
 
 // Defined outside the component so it stays stable and TinyFlatList can skip
 // re-rendering unchanged items.
-function renderItem({ item, index }: MiniFlashListRenderItemInfo<Item>) {
+function renderItem({ item, index }: TinyFlashListRenderItemInfo<Item>) {
   // Vary heights to exercise measurement.
   return (
     <View style={[styles.item, { height: 40 + (index % 5) * 15 }]}>
@@ -35,7 +35,7 @@ function renderItem({ item, index }: MiniFlashListRenderItemInfo<Item>) {
 }
 
 export default function App() {
-  const [list, setList] = useState<ListName>('MiniFlashList');
+  const [list, setList] = useState<ListName>('TinyFlashList');
 
   return (
     <View style={styles.container}>
@@ -54,8 +54,8 @@ export default function App() {
         <TinyList data={DATA} renderItem={renderItem} />
       ) : list === 'TinyFlatList' ? (
         <TinyFlatList data={DATA} renderItem={renderItem} />
-      ) : list === 'MiniFlashList' ? (
-        <MiniFlashList data={DATA} renderItem={renderItem} />
+      ) : list === 'TinyFlashList' ? (
+        <TinyFlashList data={DATA} renderItem={renderItem} />
       ) : (
         <TinyLegendList data={DATA} renderItem={renderItem} />
       )}
