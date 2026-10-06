@@ -35,6 +35,20 @@ function Row({ item }: { item: Item }) {
 
 const renderItem = ({ item }: { item: Item }) => <Row item={item} />;
 
+/** Shows which item its cell was mounted for, to see where cell state goes. */
+function StatefulRow({ item }: { item: Item }) {
+  const [firstTitle] = useState(item.title);
+  return (
+    <Text style={{ height: item.height }}>
+      {item.title}, mounted for {firstTitle}
+    </Text>
+  );
+}
+
+const renderStatefulItem = ({ item }: { item: Item }) => (
+  <StatefulRow item={item} />
+);
+
 describe('MiniFlashList', () => {
   it('renders the items near the viewport', async () => {
     await render(
@@ -89,6 +103,37 @@ describe('MiniFlashList', () => {
 
     // 35 different items have been shown, but only 20 cells (the window size) were ever mounted.
     expect(mountCount).toBe(20);
+  });
+
+  it('keeps cell state with its item when keyExtractor is set', async () => {
+    const data = createData(100);
+    const props = {
+      renderItem: renderStatefulItem,
+      keyExtractor: (item: Item) => item.title,
+    };
+    await render(<MiniFlashList data={data} {...props} />);
+
+    // Insert an item at the top: "Item 0" moves to index 1 but keeps its cell.
+    const newItem = { title: 'New', height: 50 };
+    await screen.rerender(
+      <MiniFlashList data={[newItem, ...data]} {...props} />
+    );
+    expect(screen.getByText('Item 0, mounted for Item 0')).toBeOnTheScreen();
+  });
+
+  it('keeps cell state with the index without keyExtractor', async () => {
+    const data = createData(100);
+    await render(<MiniFlashList data={data} renderItem={renderStatefulItem} />);
+
+    // Without stable ids, the cell at index 1 now shows "Item 0".
+    const newItem = { title: 'New', height: 50 };
+    await screen.rerender(
+      <MiniFlashList
+        data={[newItem, ...data]}
+        renderItem={renderStatefulItem}
+      />
+    );
+    expect(screen.getByText('Item 0, mounted for Item 1')).toBeOnTheScreen();
   });
 
   it('renders nothing for empty data', async () => {
