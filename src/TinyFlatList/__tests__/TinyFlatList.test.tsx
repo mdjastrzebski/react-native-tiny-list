@@ -20,14 +20,6 @@ const DATA: Item[] = Array.from({ length: 100 }, (_, i) => ({
 
 const renderItem = ({ item }: { item: Item }) => <Text>{item.title}</Text>;
 
-function layoutEvent(height: number) {
-  return { nativeEvent: { layout: { x: 0, y: 0, width: 300, height } } };
-}
-
-function scrollEvent(y: number) {
-  return { nativeEvent: { contentOffset: { x: 0, y } } };
-}
-
 async function renderList(props: Partial<TinyFlatListProps<Item>> = {}) {
   const result = await render(
     <TinyFlatList
@@ -74,7 +66,7 @@ describe('TinyFlatList', () => {
     });
 
     // Viewport is 500 px, items are estimated at 50 px: 10 visible items.
-    await fireEvent(scrollView, 'layout', layoutEvent(500));
+    await fireEvent.layout(scrollView, { height: 500 });
 
     // The 10 visible items render even though the budget is 5.
     await runNextBatch();
@@ -91,22 +83,26 @@ describe('TinyFlatList', () => {
 
   it('renders right away when scrolled past the rendered items', async () => {
     const scrollView = await renderList();
-    await fireEvent(scrollView, 'layout', layoutEvent(500));
+    await fireEvent.layout(scrollView, { height: 500 });
     await runNextBatch();
 
     // No timer advanced: the visible area was blank, so it renders now.
-    await fireEvent(scrollView, 'scroll', scrollEvent(3000));
+    await fireEvent.scroll(scrollView, {
+      nativeEvent: { contentOffset: { y: 3000 } },
+    });
     expect(screen.getByText('Item 60')).toBeOnTheScreen();
     expect(screen.queryByText('Item 20')).not.toBeOnTheScreen();
   });
 
   it('keeps the first initialNumToRender items rendered', async () => {
     const scrollView = await renderList({ initialNumToRender: 3 });
-    await fireEvent(scrollView, 'layout', layoutEvent(500));
+    await fireEvent.layout(scrollView, { height: 500 });
     await runNextBatch();
 
     // Window is [2500, 4000) px: items 50..79, plus items 0..2.
-    await fireEvent(scrollView, 'scroll', scrollEvent(3000));
+    await fireEvent.scroll(scrollView, {
+      nativeEvent: { contentOffset: { y: 3000 } },
+    });
     await runNextBatch();
     await runNextBatch();
     const items = renderedItems();
@@ -122,12 +118,14 @@ describe('TinyFlatList', () => {
 
   it('waits for the next batch when the visible items are rendered', async () => {
     const scrollView = await renderList({ maxToRenderPerBatch: 100 });
-    await fireEvent(scrollView, 'layout', layoutEvent(500));
+    await fireEvent.layout(scrollView, { height: 500 });
     await runNextBatch();
     expect(renderedItems()).toHaveLength(20);
 
     // Items 5..14 are visible and rendered, so nothing changes yet.
-    await fireEvent(scrollView, 'scroll', scrollEvent(250));
+    await fireEvent.scroll(scrollView, {
+      nativeEvent: { contentOffset: { y: 250 } },
+    });
     expect(renderedItems()).toHaveLength(20);
 
     // The next batch extends the window below: items 0..24.
@@ -140,18 +138,16 @@ describe('TinyFlatList', () => {
       initialNumToRender: 1,
       maxToRenderPerBatch: 100,
     });
-    await fireEvent(scrollView, 'layout', layoutEvent(500));
+    await fireEvent.layout(scrollView, { height: 500 });
     await runNextBatch();
 
     // Item 0 is 1050 px and alone fills the window. Items 1..19 are 50 px,
     // so unmeasured items are estimated at the average, 100 px.
-    await fireEvent(screen.getByText('Item 0'), 'layout', layoutEvent(1050));
+    await fireEvent.layout(screen.getByTestId('cell-0'), { height: 1050 });
     for (let index = 1; index < 20; index += 1) {
-      await fireEvent(
-        screen.getByText(`Item ${index}`),
-        'layout',
-        layoutEvent(50)
-      );
+      await fireEvent.layout(screen.getByTestId(`cell-${index}`), {
+        height: 50,
+      });
     }
     await runNextBatch();
     expect(renderedItems()).toEqual(['Item 0']);
@@ -204,7 +200,7 @@ describe('TinyFlatList', () => {
 
   it('renders nothing for empty data', async () => {
     const scrollView = await renderList({ data: [] });
-    await fireEvent(scrollView, 'layout', layoutEvent(500));
+    await fireEvent.layout(scrollView, { height: 500 });
     await runNextBatch();
     expect(renderedItems()).toEqual([]);
   });

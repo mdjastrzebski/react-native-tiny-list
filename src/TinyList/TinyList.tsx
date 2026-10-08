@@ -92,7 +92,11 @@ export function TinyList<T>({ data, renderItem }: TinyListProps<T>) {
   for (let index = startIndex; index < endIndex; index++) {
     items.push(
       // Wrap each item in a View so `onLayout` can measure its height
-      <View key={index} onLayout={(event) => handleItemLayout(index, event)}>
+      <View
+        key={index}
+        testID={`cell-${index}`}
+        onLayout={(event) => handleItemLayout(index, event)}
+      >
         {renderItem({ item: data[index] as T, index })}
       </View>
     );

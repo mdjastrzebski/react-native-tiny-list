@@ -75,6 +75,7 @@ function Container<T>({
       // Keyed by item: a container that moves to another item remounts the
       // item's views, so no state leaks from the previous item.
       key={itemKey}
+      testID={`container-${itemIndex}`}
       style={[styles.container, { top: position }]}
       onLayout={(event) =>
         onItemLayout(itemKey, event.nativeEvent.layout.height)

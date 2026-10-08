@@ -16,10 +16,6 @@ const DATA: Item[] = Array.from({ length: 100 }, (_, i) => ({
   title: `Item ${i}`,
 }));
 
-function layoutEvent(height: number) {
-  return { nativeEvent: { layout: { x: 0, y: 0, width: 300, height } } };
-}
-
 const renderItem = ({ item, index }: TinyLegendListRenderItemInfo<Item>) => (
   <Text>
     {item.title} #{index}
@@ -36,7 +32,7 @@ async function renderList(
   const scrollView = result.root!;
   // Viewport is 500 px; unmeasured items count as 100 px. The buffer is
   // 125 px above and 375 px below, so the buffered area is [-125, 875).
-  await fireEvent(scrollView, 'layout', layoutEvent(500));
+  await fireEvent.layout(scrollView, { height: 500 });
   return { ...result, scrollView };
 }
 
@@ -54,7 +50,7 @@ describe('TinyLegendList', () => {
 
   it('positions items absolutely at their offsets', async () => {
     await renderList();
-    expect(screen.getByText('Item 3 #3').parent).toHaveStyle({
+    expect(screen.getByTestId('container-3')).toHaveStyle({
       position: 'absolute',
       top: 300,
     });
@@ -88,9 +84,9 @@ describe('TinyLegendList', () => {
   it('moves the items below a measured item', async () => {
     await renderList();
 
-    await fireEvent(screen.getByText('Item 0 #0'), 'layout', layoutEvent(30));
+    await fireEvent.layout(screen.getByTestId('container-0'), { height: 30 });
 
-    expect(screen.getByText('Item 1 #1').parent).toHaveStyle({ top: 30 });
+    expect(screen.getByTestId('container-1')).toHaveStyle({ top: 30 });
   });
 
   it('removes items that are no longer in the data', async () => {
@@ -113,9 +109,9 @@ describe('TinyLegendList', () => {
         keyExtractor={keyExtractor}
       />
     );
-    await fireEvent(root!, 'layout', layoutEvent(500));
-    await fireEvent(screen.getByText('Item 0 #0'), 'layout', layoutEvent(30));
-    await fireEvent(screen.getByText('Item 1 #1'), 'layout', layoutEvent(50));
+    await fireEvent.layout(root!, { height: 500 });
+    await fireEvent.layout(screen.getByTestId('container-0'), { height: 30 });
+    await fireEvent.layout(screen.getByTestId('container-1'), { height: 50 });
 
     await rerender(
       <TinyLegendList
@@ -126,9 +122,9 @@ describe('TinyLegendList', () => {
     );
 
     // `New` is estimated at the average (40); the others keep their sizes.
-    expect(screen.getByText('Item 0 #1').parent).toHaveStyle({ top: 40 });
-    expect(screen.getByText('Item 1 #2').parent).toHaveStyle({ top: 70 });
-    expect(screen.getByText('Item 2 #3').parent).toHaveStyle({ top: 120 });
+    expect(screen.getByTestId('container-1')).toHaveStyle({ top: 40 });
+    expect(screen.getByTestId('container-2')).toHaveStyle({ top: 70 });
+    expect(screen.getByTestId('container-3')).toHaveStyle({ top: 120 });
   });
 
   it('keeps items mounted when an item is inserted above them', async () => {
@@ -150,7 +146,7 @@ describe('TinyLegendList', () => {
         keyExtractor={keyExtractor}
       />
     );
-    await fireEvent(root!, 'layout', layoutEvent(500));
+    await fireEvent.layout(root!, { height: 500 });
     shown.mockClear();
 
     await rerender(

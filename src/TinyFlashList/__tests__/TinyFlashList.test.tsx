@@ -66,11 +66,11 @@ describe('TinyFlashList', () => {
     data[0] = { title: 'Item 0', height: 300 };
     await render(<TinyFlashList data={data} renderItem={renderItem} />);
 
-    expect(screen.getByText('Item 1').parent).toHaveStyle({
+    expect(screen.getByTestId('cell-1')).toHaveStyle({
       position: 'absolute',
       top: 300,
     });
-    expect(screen.getByText('Item 2').parent).toHaveStyle({ top: 350 });
+    expect(screen.getByTestId('cell-2')).toHaveStyle({ top: 350 });
   });
 
   it('renders new items when scrolled', async () => {

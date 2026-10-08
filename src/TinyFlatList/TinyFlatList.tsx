@@ -250,7 +250,10 @@ function CellView<T>({
   onCellLayout,
 }: CellProps<T>) {
   return (
-    <View onLayout={(event) => onCellLayout(cellKey, event)}>
+    <View
+      testID={`cell-${index}`}
+      onLayout={(event) => onCellLayout(cellKey, event)}
+    >
       {renderItem({ item, index })}
     </View>
   );

@@ -14,10 +14,6 @@ const DATA: Item[] = Array.from({ length: 100 }, (_, i) => ({
   title: `Item ${i}`,
 }));
 
-function layoutEvent(height: number) {
-  return { nativeEvent: { layout: { x: 0, y: 0, width: 300, height } } };
-}
-
 async function renderList(data: ReadonlyArray<Item> = DATA) {
   const result = await render(
     <TinyList
@@ -31,7 +27,7 @@ async function renderList(data: ReadonlyArray<Item> = DATA) {
   );
   const scrollView = result.root!;
   // Viewport is 500 px; unmeasured items count as 50 px.
-  await fireEvent(scrollView, 'layout', layoutEvent(500));
+  await fireEvent.layout(scrollView, { height: 500 });
   return scrollView;
 }
 
@@ -65,7 +61,7 @@ describe('TinyList', () => {
   it('uses measured item sizes', async () => {
     await renderList();
 
-    await fireEvent(screen.getByText('Item 0 #0'), 'layout', layoutEvent(1000));
+    await fireEvent.layout(screen.getByTestId('cell-0'), { height: 1000 });
 
     // Item 0 alone fills the whole window.
     expect(screen.getByText('Item 0 #0')).toBeOnTheScreen();

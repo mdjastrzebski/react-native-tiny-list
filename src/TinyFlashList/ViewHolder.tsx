@@ -68,6 +68,7 @@ function ViewHolderInternal<T>({
   return (
     <View
       ref={viewRef}
+      testID={`cell-${index}`}
       onLayout={handleLayout}
       // Absolute positioning: the layout manager decides where each cell goes.
       style={[styles.cell, { top: offset }]}
