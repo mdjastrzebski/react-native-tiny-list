@@ -6,7 +6,13 @@ import {
   it,
   jest,
 } from '@jest/globals';
-import { act, fireEvent, render, screen } from '@testing-library/react-native';
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  userEvent,
+} from '@testing-library/react-native';
 import { Text } from 'react-native';
 import { TinyFlatList, type TinyFlatListProps } from '../TinyFlatList';
 import { defaultKeyExtractor } from '../TinyFlatList';
@@ -82,27 +88,25 @@ describe('TinyFlatList', () => {
   });
 
   it('renders right away when scrolled past the rendered items', async () => {
+    const user = userEvent.setup();
     const scrollView = await renderList();
     await fireEvent.layout(scrollView, { height: 500 });
     await runNextBatch();
 
     // No timer advanced: the visible area was blank, so it renders now.
-    await fireEvent.scroll(scrollView, {
-      nativeEvent: { contentOffset: { y: 3000 } },
-    });
+    await user.scrollTo(scrollView, { y: 3000 });
     expect(screen.getByText('Item 60')).toBeOnTheScreen();
     expect(screen.queryByText('Item 20')).not.toBeOnTheScreen();
   });
 
   it('keeps the first initialNumToRender items rendered', async () => {
+    const user = userEvent.setup();
     const scrollView = await renderList({ initialNumToRender: 3 });
     await fireEvent.layout(scrollView, { height: 500 });
     await runNextBatch();
 
     // Window is [2500, 4000) px: items 50..79, plus items 0..2.
-    await fireEvent.scroll(scrollView, {
-      nativeEvent: { contentOffset: { y: 3000 } },
-    });
+    await user.scrollTo(scrollView, { y: 3000 });
     await runNextBatch();
     await runNextBatch();
     const items = renderedItems();
@@ -117,15 +121,14 @@ describe('TinyFlatList', () => {
   });
 
   it('waits for the next batch when the visible items are rendered', async () => {
+    const user = userEvent.setup();
     const scrollView = await renderList({ maxToRenderPerBatch: 100 });
     await fireEvent.layout(scrollView, { height: 500 });
     await runNextBatch();
     expect(renderedItems()).toHaveLength(20);
 
     // Items 5..14 are visible and rendered, so nothing changes yet.
-    await fireEvent.scroll(scrollView, {
-      nativeEvent: { contentOffset: { y: 250 } },
-    });
+    await user.scrollTo(scrollView, { y: 250 });
     expect(renderedItems()).toHaveLength(20);
 
     // The next batch extends the window below: items 0..24.
